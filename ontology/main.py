@@ -9,7 +9,6 @@ onto.load()
 onto = get_ontology("http://test.org/simple.owl")
 
 
-
 with onto:
     # Base class
     class Person(Thing):pass # The superclass for all human actors.
