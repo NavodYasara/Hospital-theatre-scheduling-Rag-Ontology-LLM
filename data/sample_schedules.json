@@ -1,0 +1,109 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-01",
+    "description": "Sample hospital scheduling data"
+  },
+  "surgeons": [
+    {
+      "name": "Dr_Smith",
+      "license": "NS12345",
+      "specialization": "Neurosurgery",
+      "theatre": "Neuro_Theatre"
+    },
+    {
+      "name": "Dr_Johnson",
+      "license": "OS67890",
+      "specialization": "Orthopedics",
+      "theatre": "Ortho_Theatre"
+    },
+    {
+      "name": "Dr_Williams",
+      "license": "CS78901",
+      "specialization": "Cardiothoracic",
+      "theatre": "Cardio_Theatre"
+    },
+    {
+      "name": "Dr_Brown",
+      "license": "GS34567",
+      "specialization": "General Surgery",
+      "theatre": "General_Theatre"
+    }
+  ],
+  "theatres": [
+    {"name": "Neuro_Theatre", "type": "Neurosurgery"},
+    {"name": "Ortho_Theatre", "type": "Orthopedics"},
+    {"name": "Cardio_Theatre", "type": "Cardiothoracic"},
+    {"name": "General_Theatre", "type": "General"}
+  ],
+  "timeslots": [
+    {"name": "TimeSlot_08_00", "start": "08:00", "end": "10:30", "duration": 150},
+    {"name": "TimeSlot_10_45", "start": "10:45", "end": "13:15", "duration": 150},
+    {"name": "TimeSlot_14_00", "start": "14:00", "end": "16:30", "duration": 150},
+    {"name": "TimeSlot_16_45", "start": "16:45", "end": "19:15", "duration": 150}
+  ],
+  "surgeries": [
+    {
+      "name": "Brain_Surgery",
+      "surgeon": "Dr_Smith",
+      "theatre": "Neuro_Theatre",
+      "timeslot": "TimeSlot_08_00",
+      "duration": 180,
+      "emergency": true,
+      "equipment": ["Neuro_Scope"]
+    },
+    {
+      "name": "Cardiac_Bypass_Surgery",
+      "surgeon": "Dr_Williams",
+      "theatre": "Cardio_Theatre",
+      "timeslot": "TimeSlot_10_45",
+      "duration": 240,
+      "emergency": false,
+      "equipment": ["Cardiac_Monitor", "Bypass_Machine"]
+    },
+    {
+      "name": "Hip_Replacement_Surgery",
+      "surgeon": "Dr_Johnson",
+      "theatre": "Ortho_Theatre",
+      "timeslot": "TimeSlot_14_00",
+      "duration": 120,
+      "emergency": false,
+      "equipment": ["Hip_Prosthesis", "Surgical_Drill"]
+    },
+    {
+      "name": "Appendectomy",
+      "surgeon": "Dr_Brown",
+      "theatre": "General_Theatre",
+      "timeslot": "TimeSlot_16_45",
+      "duration": 90,
+      "emergency": true,
+      "equipment": ["Laparoscope"]
+    }
+  ],
+  "patients": [
+    {
+      "name": "Patient_John_Doe",
+      "timeslot": "TimeSlot_08_00",
+      "ward": "Neurology_Ward",
+      "recovery": "Recovery_Room_A"
+    },
+    {
+      "name": "Patient_Mary_Smith",
+      "timeslot": "TimeSlot_10_45",
+      "ward": "Cardiology_Ward",
+      "recovery": "Recovery_Room_B"
+    },
+    {
+      "name": "Patient_Robert_Johnson",
+      "timeslot": "TimeSlot_14_00",
+      "ward": "Orthopedic_Ward",
+      "recovery": "Recovery_Room_C"
+    },
+    {
+      "name": "Patient_Linda_Williams",
+      "timeslot": "TimeSlot_16_45",
+      "ward": "General_Ward",
+      "recovery": "Recovery_Room_A"
+    }
+  ]
+}

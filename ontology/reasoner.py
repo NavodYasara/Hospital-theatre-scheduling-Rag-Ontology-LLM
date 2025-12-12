@@ -1,0 +1,234 @@
+from owlready2 import sync_reasoner_pellet, Imp
+from typing import List, Dict, Tuple
+from datetime import datetime
+
+class ConflictDetector:
+    """
+    Detects scheduling conflicts using ontology reasoning
+    and programmatic validation
+    """
+    
+    def __init__(self, ontology_manager):
+        self.onto_mgr = ontology_manager
+        self.onto = ontology_manager.onto
+    
+    def run_pellet_reasoner(self):
+        """Execute Pellet reasoner to infer conflicts"""
+        try:
+            print("🔄 Running Pellet reasoner...")
+            sync_reasoner_pellet(infer_property_values=True, infer_data_property_values=True)
+            print("✅ Reasoner completed")
+            return True
+        except Exception as e:
+            print(f"❌ Reasoner error: {e}")
+            return False
+    
+    def add_swrl_rules(self):
+        """Add SWRL rules for conflict detection"""
+        with self.onto:
+            # Rule 1: Scheduling Conflict - surgeon has overlapping surgeries
+            rule1 = Imp()
+            rule1.set_as_rule("""
+                Surgeon(?s), performs_operation(?s, ?op1), performs_operation(?s, ?op2),
+                has_timeslot(?op1, ?t1), has_timeslot(?op2, ?t2),
+                has_temporal_overlap(?t1, ?t2), differentFrom(?op1, ?op2)
+                -> SchedulingConflict(?s)
+            """)
+            
+            # Rule 2: Equipment Conflict
+            rule2 = Imp()
+            rule2.set_as_rule("""
+                requires_equipment(?s1, ?e), requires_equipment(?s2, ?e),
+                has_timeslot(?s1, ?t1), has_timeslot(?s2, ?t2),
+                has_temporal_overlap(?t1, ?t2), differentFrom(?s1, ?s2)
+                -> EquipmentConflict(?e)
+            """)
+            
+            # Rule 3: Theatre Conflict
+            rule3 = Imp()
+            rule3.set_as_rule("""
+                requires_theatre_type(?s1, ?th), requires_theatre_type(?s2, ?th),
+                has_timeslot(?s1, ?t1), has_timeslot(?s2, ?t2),
+                has_temporal_overlap(?t1, ?t2), differentFrom(?s1, ?s2)
+                -> TheatreConflict(?th)
+            """)
+            
+            # Rule 4: Specialization Mismatch
+            rule4 = Imp()
+            rule4.set_as_rule("""
+                Surgeon(?s), performs_operation(?s, ?op),
+                requires_theatre_type(?op, ?th), works_in_theatre(?s, ?wt),
+                differentFrom(?th, ?wt)
+                -> SpecializationMismatch(?s)
+            """)
+            
+            # Rule 5: Recovery Schedule
+            rule5 = Imp()
+            rule5.set_as_rule("""
+                Patient(?p), is_assigned_to(?p, ?t), assigned_to_recovery(?p, ?r)
+                -> hasRecoverySchedule(?p)
+            """)
+        
+        self.onto_mgr.save()
+        print("✅ SWRL rules added")
+    
+    # ========== PROGRAMMATIC CONFLICT DETECTION ==========
+    
+    def check_surgeon_conflicts(self, surgeon_name: str = None) -> List[Dict]:
+        """Check if surgeon has overlapping surgeries"""
+        conflicts = []
+        
+        surgeons = [self.onto_mgr.get_surgeon_by_name(surgeon_name)] if surgeon_name else self.onto_mgr.get_all_surgeons()
+        
+        for surgeon in surgeons:
+            if not surgeon:
+                continue
+            
+            surgeries = list(surgeon.performs_operation)
+            
+            # Compare all pairs of surgeries
+            for i in range(len(surgeries)):
+                for j in range(i + 1, len(surgeries)):
+                    surgery1 = surgeries[i]
+                    surgery2 = surgeries[j]
+                    
+                    if self._surgeries_overlap(surgery1, surgery2):
+                        conflicts.append({
+                            'type': 'Surgeon Double-Booking',
+                            'surgeon': surgeon.name,
+                            'surgery1': surgery1.name,
+                            'surgery2': surgery2.name,
+                            'severity': 'HIGH',
+                            'description': f"{surgeon.name} is scheduled for two surgeries at overlapping times"
+                        })
+        
+        return conflicts
+    
+    def check_theatre_conflicts(self, theatre_name: str = None) -> List[Dict]:
+        """Check if theatre has overlapping bookings"""
+        conflicts = []
+        
+        theatres = [self.onto.search_one(iri=f"*{theatre_name}")] if theatre_name else self.onto_mgr.get_all_theatres()
+        
+        for theatre in theatres:
+            if not theatre:
+                continue
+            
+            # Get all surgeries in this theatre
+            surgeries = [s for s in self.onto.Surgery.instances() 
+                        if s.requires_theatre_type and s.requires_theatre_type[0] == theatre]
+            
+            # Compare all pairs
+            for i in range(len(surgeries)):
+                for j in range(i + 1, len(surgeries)):
+                    if self._surgeries_overlap(surgeries[i], surgeries[j]):
+                        conflicts.append({
+                            'type': 'Theatre Double-Booking',
+                            'theatre': theatre.name,
+                            'surgery1': surgeries[i].name,
+                            'surgery2': surgeries[j].name,
+                            'severity': 'HIGH',
+                            'description': f"{theatre.name} is double-booked"
+                        })
+        
+        return conflicts
+    
+    def check_equipment_conflicts(self) -> List[Dict]:
+        """Check if equipment is double-booked"""
+        conflicts = []
+        
+        # Get all equipment
+        equipment_list = list(self.onto.SurgicalEquipment.instances())
+        
+        for equipment in equipment_list:
+            # Get surgeries using this equipment
+            surgeries = [s for s in self.onto.Surgery.instances()
+                        if equipment in s.requires_equipment]
+            
+            # Compare all pairs
+            for i in range(len(surgeries)):
+                for j in range(i + 1, len(surgeries)):
+                    if self._surgeries_overlap(surgeries[i], surgeries[j]):
+                        conflicts.append({
+                            'type': 'Equipment Conflict',
+                            'equipment': equipment.name,
+                            'surgery1': surgeries[i].name,
+                            'surgery2': surgeries[j].name,
+                            'severity': 'MEDIUM',
+                            'description': f"{equipment.name} is needed by two surgeries simultaneously"
+                        })
+        
+        return conflicts
+    
+    def check_specialization_mismatches(self) -> List[Dict]:
+        """Check if surgeons are working in wrong theatre types"""
+        mismatches = []
+        
+        for surgery in self.onto.Surgery.instances():
+            if not surgery.performs_operation or not surgery.requires_theatre_type:
+                continue
+            
+            surgeon = surgery.performs_operation[0]
+            required_theatre = surgery.requires_theatre_type[0]
+            
+            if surgeon.works_in_theatre:
+                surgeon_theatre = surgeon.works_in_theatre[0]
+                
+                if surgeon_theatre != required_theatre:
+                    mismatches.append({
+                        'type': 'Specialization Mismatch',
+                        'surgeon': surgeon.name,
+                        'surgery': surgery.name,
+                        'surgeon_theatre': surgeon_theatre.name,
+                        'required_theatre': required_theatre.name,
+                        'severity': 'MEDIUM',
+                        'description': f"{surgeon.name} works in {surgeon_theatre.name} but surgery requires {required_theatre.name}"
+                    })
+        
+        return mismatches
+    
+    def detect_all_conflicts(self) -> Dict[str, List[Dict]]:
+        """Run all conflict detection checks"""
+        return {
+            'surgeon_conflicts': self.check_surgeon_conflicts(),
+            'theatre_conflicts': self.check_theatre_conflicts(),
+            'equipment_conflicts': self.check_equipment_conflicts(),
+            'specialization_mismatches': self.check_specialization_mismatches()
+        }
+    
+    # ========== HELPER METHODS ==========
+    
+    def _surgeries_overlap(self, surgery1, surgery2) -> bool:
+        """Check if two surgeries have overlapping timeslots"""
+        if not surgery1.has_timeslot or not surgery2.has_timeslot:
+            return False
+        
+        ts1 = surgery1.has_timeslot[0]
+        ts2 = surgery2.has_timeslot[0]
+        
+        # Check if timeslots have temporal overlap property
+        if ts2 in ts1.has_temporal_overlap:
+            return True
+        
+        # Also check time strings
+        if ts1.start_time and ts1.end_time and ts2.start_time and ts2.end_time:
+            return self._times_overlap(
+                ts1.start_time[0], ts1.end_time[0],
+                ts2.start_time[0], ts2.end_time[0]
+            )
+        
+        return False
+    
+    def _times_overlap(self, start1: str, end1: str, start2: str, end2: str) -> bool:
+        """Check if two time ranges overlap"""
+        try:
+            # Convert strings to comparable format (HH:MM)
+            s1 = start1.replace(':', '')
+            e1 = end1.replace(':', '')
+            s2 = start2.replace(':', '')
+            e2 = end2.replace(':', '')
+            
+            # Check overlap: start1 < end2 AND start2 < end1
+            return s1 < e2 and s2 < e1
+        except:
+            return False
