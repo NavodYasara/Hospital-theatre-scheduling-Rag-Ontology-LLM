@@ -42,7 +42,6 @@ class OntologyManager:
             # Person Subclasses
             class Staff(Person): pass
             class Surgeon(Staff): pass
-            class Nurse(Staff): pass
             class Anesthetist(Staff): pass
             class Patient(Person): pass
             
