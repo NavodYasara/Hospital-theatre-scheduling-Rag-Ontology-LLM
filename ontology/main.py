@@ -105,7 +105,7 @@ TS5.duration = [150]
 
 TS6 = onto.TimeSlot("TimeSlot_22_45")
 TS6.start_time = ["22:45"]
-TS6.end_time = ["01:15"]  # FIXED: was "25:15" which is invalid
+TS6.end_time = ["01:15"] 
 TS6.duration = [150]
 
 # Severity Levels (FIXED: Now independent class with values)

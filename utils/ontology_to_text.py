@@ -77,11 +77,6 @@ This theatre is equipped for {theatre_type} surgical procedures."""
             end = ts.end_time[0] if ts.end_time else 'N/A'
             timeslot = f"{start} to {end}"
         
-        # Get equipment
-        equipment = []
-        for eq in surgery.requires_equipment:
-            equipment.append(eq.name)
-        equipment_text = ", ".join(equipment) if equipment else "No specific equipment listed"
         
         emergency_text = "This is an EMERGENCY surgery requiring immediate attention." if emergency else ""
         
@@ -91,7 +86,6 @@ Theatre: {theatre}
 Scheduled Time: {timeslot}
 Duration: {duration} minutes
 Emergency Status: {'EMERGENCY' if emergency else 'Routine'}
-Required Equipment: {equipment_text}
 {emergency_text}"""
         
         return text.strip()
@@ -188,11 +182,10 @@ Scheduled Surgeries: {surgeries_text}"""
             'text': """Hospital Scheduling Rules:
 1. Each surgeon can only perform one surgery at a time
 2. Each theatre can only host one surgery at a time
-3. Equipment cannot be used in multiple surgeries simultaneously
-4. Surgeons should operate in their specialization theatre
-5. Emergency surgeries have higher priority than routine surgeries
-6. Minimum rest time between surgeries should be respected
-7. Post-operative recovery rooms must be available""",
+3. Surgeons should operate in their specialization theatre
+4. Emergency surgeries have higher priority than routine surgeries
+5. Minimum rest time between surgeries should be respected
+6. Post-operative recovery rooms must be available""",
             'type': 'rules',
             'entity_id': 'scheduling_rules'
         })

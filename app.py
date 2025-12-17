@@ -123,7 +123,6 @@ def main():
             - Show me all surgeries scheduled for today
             - Are there any conflicts in the current schedule?
             - Suggest a time slot for an emergency brain surgery
-            - What equipment is needed for cardiac bypass surgery?
             """)
         
         # Display chat history
@@ -183,7 +182,6 @@ def main():
         This system automatically detects:
         - 👨‍⚕️ **Surgeon Double-Bookings**: Same surgeon scheduled for multiple surgeries at overlapping times
         - 🏥 **Theatre Conflicts**: Same theatre booked for multiple surgeries simultaneously
-        - ⚙️ **Equipment Conflicts**: Same equipment needed by multiple surgeries at the same time
         - 🔍 **Specialization Mismatches**: Surgeons operating in theatres outside their specialization
         """)
         
@@ -228,18 +226,6 @@ def main():
                                 
                                 st.markdown("**💡 Suggested Resolution:**")
                                 st.info("Move one surgery to an available alternative theatre or adjust the time slots.")
-                    
-                    if conflicts['equipment_conflicts']:
-                        st.subheader("⚙️ Equipment Conflicts")
-                        for conflict in conflicts['equipment_conflicts']:
-                            with st.expander(f"⚠️ {conflict['equipment']} - {conflict['severity']} SEVERITY"):
-                                st.write(f"**Description:** {conflict['description']}")
-                                st.write(f"**Conflicting Surgeries:**")
-                                st.write(f"- {conflict['surgery1']}")
-                                st.write(f"- {conflict['surgery2']}")
-                                
-                                st.markdown("**💡 Suggested Resolution:**")
-                                st.info("Reschedule one surgery or arrange for backup equipment.")
                     
                     if conflicts['specialization_mismatches']:
                         st.subheader("🔍 Specialization Mismatches")
@@ -347,7 +333,37 @@ def main():
         with col1:
             st.subheader("Surgery Details")
             
-            surgery_name = st.text_input("Surgery Name", placeholder="e.g., Knee_Arthroscopy")
+            # Surgery Type Dropdown (instead of text input)
+            surgery_types = [
+                "Brain_Surgery",
+                "Cardiac_Bypass_Surgery",
+                "Hip_Replacement_Surgery",
+                "Knee_Arthroscopy",
+                "Appendectomy",
+                "Spinal_Surgery",
+                "Cataract_Surgery",
+                "Hernia_Repair",
+                "Gallbladder_Removal",
+                "Thyroid_Surgery",
+                "Custom (Type Below)"
+            ]
+            
+            selected_surgery_type = st.selectbox(
+                "Surgery Type",
+                surgery_types,
+                help="Select a surgery type from the list or choose 'Custom' to enter your own"
+            )
+            
+            # Show text input only if "Custom" is selected
+            if selected_surgery_type == "Custom (Type Below)":
+                surgery_name = st.text_input(
+                    "Custom Surgery Name",
+                    placeholder="e.g., Knee_Arthroscopy",
+                    help="Enter a custom surgery name using underscores instead of spaces"
+                )
+            else:
+                surgery_name = selected_surgery_type
+                st.info(f"Selected: **{surgery_name}**")
             
             # Get available surgeons
             surgeons = onto_mgr.get_all_surgeons()
@@ -388,50 +404,153 @@ def main():
                 st.warning("No timeslots available")
                 selected_timeslot = None
         
+        # Patient Information Section (NEW)
         st.markdown("---")
+        st.subheader("👤 Patient Information")
+        
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            patient_name = st.text_input(
+                "Patient Name",
+                placeholder="e.g., Patient_John_Doe",
+                help="Enter patient name using underscores instead of spaces"
+            )
+        
+        with col4:
+            # Severity Level Dropdown (NEW)
+            severity_levels = ["Severe", "Moderate", "Mild", "Minor"]
+            selected_severity = st.selectbox(
+                "Patient Severity Level",
+                severity_levels,
+                index=1,  # Default to "Moderate"
+                help="Select the severity level for this patient"
+            )
+        
+        # Additional patient details
+        col5, col6 = st.columns(2)
+        
+        with col5:
+            # Get available wards
+            wards = list(onto_mgr.onto.Ward.instances())
+            ward_names = [w.name for w in wards] if wards else ["General_Ward"]
+            
+            selected_ward = st.selectbox(
+                "Admission Ward",
+                ward_names,
+                help="Select the ward where patient will be admitted"
+            )
+        
+        with col6:
+            # Get available recovery rooms
+            recovery_rooms = list(onto_mgr.onto.RecoveryRoom.instances())
+            recovery_room_names = [r.name for r in recovery_rooms] if recovery_rooms else ["Recovery_Room_A"]
+            
+            selected_recovery = st.selectbox(
+                "Recovery Room",
+                recovery_room_names,
+                help="Select the recovery room for post-operative care"
+            )
+        
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("✅ Add Surgery", type="primary"):
+            if st.button("✅ Add Surgery Schedule", type="primary"):
+                # Validation
                 if not surgery_name:
-                    st.error("Please enter a surgery name")
+                    st.error("Please select or enter a surgery name")
                 elif not selected_surgeon:
                     st.error("Please select a surgeon")
                 elif not selected_theatre:
                     st.error("Please select a theatre")
                 elif not selected_timeslot:
                     st.error("Please select a timeslot")
+                elif not patient_name:
+                    st.error("Please enter a patient name")
                 else:
                     # Check for conflicts before adding
-                    with st.spinner("Checking for conflicts..."):
-                        # This is a simplified check - you can enhance it
-                        conflicts = conflict_detector.detect_all_conflicts()
-                        
-                        # Add the surgery
-                        success = onto_mgr.add_surgery(
-                            name=surgery_name,
-                            surgeon_name=selected_surgeon,
-                            theatre_name=selected_theatre,
-                            timeslot_name=selected_timeslot,
-                            duration=duration,
-                            is_emergency=is_emergency
-                        )
-                        
-                        if success:
-                            st.success(f"✅ Surgery '{surgery_name}' added successfully!")
-                            st.info("💡 Tip: Go to 'Conflict Detection' tab to verify no conflicts exist")
+                    with st.spinner("Creating surgery schedule..."):
+                        try:
+                            # Add the surgery
+                            success = onto_mgr.add_surgery(
+                                name=surgery_name,
+                                surgeon_name=selected_surgeon,
+                                theatre_name=selected_theatre,
+                                timeslot_name=selected_timeslot,
+                                duration=duration,
+                                is_emergency=is_emergency
+                            )
                             
-                            # Clear cache to reload data
-                            st.cache_resource.clear()
-                        else:
-                            st.error("❌ Failed to add surgery. Check logs for details.")
+                            if success:
+                                # Add patient with all details
+                                with onto_mgr.onto:
+                                    # Create patient
+                                    patient = onto_mgr.onto.Patient(patient_name)
+                                    
+                                    # Find severity instance
+                                    severity_instance = onto_mgr.onto.search_one(iri=f"*{selected_severity}")
+                                    if severity_instance:
+                                        patient.has_severity = [severity_instance]
+                                    
+                                    # Find timeslot
+                                    timeslot_instance = onto_mgr.onto.search_one(iri=f"*{selected_timeslot}")
+                                    if timeslot_instance:
+                                        patient.is_assigned_to = [timeslot_instance]
+                                    
+                                    # Find ward
+                                    ward_instance = onto_mgr.onto.search_one(iri=f"*{selected_ward}")
+                                    if ward_instance:
+                                        patient.admitted_to = [ward_instance]
+                                    
+                                    # Find recovery room
+                                    recovery_instance = onto_mgr.onto.search_one(iri=f"*{selected_recovery}")
+                                    if recovery_instance:
+                                        patient.assigned_to_recovery = [recovery_instance]
+                                    
+                                    # Link patient to surgery
+                                    surgery_instance = onto_mgr.onto.search_one(iri=f"*{surgery_name}")
+                                    if surgery_instance:
+                                        patient.undergoes_surgery = [surgery_instance]
+                                
+                                # Save changes
+                                onto_mgr.save()
+                                
+                                st.success(f"✅ Surgery schedule created successfully!")
+                                st.success(f"   • Surgery: **{surgery_name}**")
+                                st.success(f"   • Patient: **{patient_name}** (Severity: {selected_severity})")
+                                st.success(f"   • Surgeon: **{selected_surgeon}**")
+                                st.success(f"   • Theatre: **{selected_theatre}**")
+                                st.success(f"   • Time: **{selected_timeslot}**")
+                                
+                                st.info("💡 Tip: Go to 'Conflict Detection' tab to verify no conflicts exist")
+                                
+                                # Clear cache to reload data
+                                st.cache_resource.clear()
+                            else:
+                                st.error("❌ Failed to add surgery. Check logs for details.")
+                        
+                        except Exception as e:
+                            st.error(f"❌ Error creating schedule: {str(e)}")
+                            st.exception(e)
         
         with col2:
             if st.button("🔍 Preview Conflicts"):
                 if selected_surgeon and selected_timeslot:
-                    st.info("This would check for potential conflicts with this scheduling")
-                    # You can implement preview logic here
+                    with st.spinner("Checking for potential conflicts..."):
+                        conflicts = conflict_detector.detect_all_conflicts()
+                        
+                        total_conflicts = sum(len(v) for v in conflicts.values())
+                        
+                        if total_conflicts == 0:
+                            st.success("✅ No conflicts detected with current schedules!")
+                        else:
+                            st.warning(f"⚠️ Found {total_conflicts} potential conflict(s)")
+                            
+                            if conflicts['surgeon_conflicts']:
+                                st.error(f"👨‍⚕️ Surgeon conflicts: {len(conflicts['surgeon_conflicts'])}")
+                            if conflicts['theatre_conflicts']:
+                                st.error(f"🏥 Theatre conflicts: {len(conflicts['theatre_conflicts'])}")
                 else:
                     st.warning("Fill in surgeon and timeslot first")
         

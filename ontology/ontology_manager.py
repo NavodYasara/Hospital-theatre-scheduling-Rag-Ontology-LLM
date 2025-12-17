@@ -34,7 +34,6 @@ class OntologyManager:
             
             # Conflict Classes
             class SchedulingConflict(Thing): pass
-            class EquipmentConflict(SchedulingConflict): pass
             class TheatreConflict(SchedulingConflict): pass
             class SpecializationMismatch(SchedulingConflict): pass
             class hasRecoverySchedule(Thing): pass
@@ -55,9 +54,6 @@ class OntologyManager:
             class Surgery(MedicalProcedure): pass
             class TimeSlot(ClinicalProcess): pass
             
-            # Resource Subclasses
-            class SurgicalEquipment(Resource): pass
-            
             # Object Properties
             class performs_operation(ObjectProperty):
                 domain = [Surgeon]
@@ -66,10 +62,6 @@ class OntologyManager:
             class requires_theatre_type(ObjectProperty):
                 domain = [Surgery]
                 range = [Theatre]
-            
-            class requires_equipment(ObjectProperty):
-                domain = [Surgery]
-                range = [SurgicalEquipment]
             
             class is_assigned_to(ObjectProperty):
                 domain = [Patient]

@@ -35,36 +35,27 @@ class ConflictDetector:
                 -> SchedulingConflict(?s)
             """)
             
-            # Rule 2: Equipment Conflict
+            # Rule 2: Theatre Conflict
             rule2 = Imp()
             rule2.set_as_rule("""
-                requires_equipment(?s1, ?e), requires_equipment(?s2, ?e),
-                has_timeslot(?s1, ?t1), has_timeslot(?s2, ?t2),
-                has_temporal_overlap(?t1, ?t2), differentFrom(?s1, ?s2)
-                -> EquipmentConflict(?e)
-            """)
-            
-            # Rule 3: Theatre Conflict
-            rule3 = Imp()
-            rule3.set_as_rule("""
                 requires_theatre_type(?s1, ?th), requires_theatre_type(?s2, ?th),
                 has_timeslot(?s1, ?t1), has_timeslot(?s2, ?t2),
                 has_temporal_overlap(?t1, ?t2), differentFrom(?s1, ?s2)
                 -> TheatreConflict(?th)
             """)
             
-            # Rule 4: Specialization Mismatch
-            rule4 = Imp()
-            rule4.set_as_rule("""
+            # Rule 3: Specialization Mismatch
+            rule3 = Imp()
+            rule3.set_as_rule("""
                 Surgeon(?s), performs_operation(?s, ?op),
                 requires_theatre_type(?op, ?th), works_in_theatre(?s, ?wt),
                 differentFrom(?th, ?wt)
                 -> SpecializationMismatch(?s)
             """)
             
-            # Rule 5: Recovery Schedule
-            rule5 = Imp()
-            rule5.set_as_rule("""
+            # Rule 4: Recovery Schedule
+            rule4 = Imp()
+            rule4.set_as_rule("""
                 Patient(?p), is_assigned_to(?p, ?t), assigned_to_recovery(?p, ?r)
                 -> hasRecoverySchedule(?p)
             """)
@@ -133,32 +124,7 @@ class ConflictDetector:
         
         return conflicts
     
-    def check_equipment_conflicts(self) -> List[Dict]:
-        """Check if equipment is double-booked"""
-        conflicts = []
-        
-        # Get all equipment
-        equipment_list = list(self.onto.SurgicalEquipment.instances())
-        
-        for equipment in equipment_list:
-            # Get surgeries using this equipment
-            surgeries = [s for s in self.onto.Surgery.instances()
-                        if equipment in s.requires_equipment]
-            
-            # Compare all pairs
-            for i in range(len(surgeries)):
-                for j in range(i + 1, len(surgeries)):
-                    if self._surgeries_overlap(surgeries[i], surgeries[j]):
-                        conflicts.append({
-                            'type': 'Equipment Conflict',
-                            'equipment': equipment.name,
-                            'surgery1': surgeries[i].name,
-                            'surgery2': surgeries[j].name,
-                            'severity': 'MEDIUM',
-                            'description': f"{equipment.name} is needed by two surgeries simultaneously"
-                        })
-        
-        return conflicts
+
     
     def check_specialization_mismatches(self) -> List[Dict]:
         """Check if surgeons are working in wrong theatre types"""
@@ -192,7 +158,6 @@ class ConflictDetector:
         return {
             'surgeon_conflicts': self.check_surgeon_conflicts(),
             'theatre_conflicts': self.check_theatre_conflicts(),
-            'equipment_conflicts': self.check_equipment_conflicts(),
             'specialization_mismatches': self.check_specialization_mismatches()
         }
     
