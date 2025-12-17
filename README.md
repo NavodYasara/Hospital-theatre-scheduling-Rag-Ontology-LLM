@@ -23,7 +23,6 @@ An **Ontology-Guided RAG (Retrieval-Augmented Generation) System** that combines
 - [Configuration](#-configuration)
 - [Example Queries](#-example-queries)
 - [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
 - [License](#-license)
 
 ---
