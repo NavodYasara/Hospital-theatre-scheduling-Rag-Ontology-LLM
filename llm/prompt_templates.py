@@ -44,7 +44,6 @@ Instructions:
 2. Identify any conflicts:
    - Surgeon double-bookings (same surgeon, overlapping times)
    - Theatre double-bookings (same theatre, overlapping times)
-   - Equipment conflicts (same equipment needed simultaneously)
    - Specialization mismatches (surgeon in wrong theatre type)
 3. For each conflict, explain why it's a problem
 4. Suggest solutions
@@ -53,7 +52,7 @@ Format your response:
 **Conflicts Detected:** [Number]
 
 For each conflict:
-**Conflict Type:** [Surgeon/Theatre/Equipment/Specialization]
+**Conflict Type:** [Surgeon/Theatre/Specialization]
 **Description:** [What's the conflict]
 **Severity:** [High/Medium/Low]
 **Solution:** [How to resolve]"""

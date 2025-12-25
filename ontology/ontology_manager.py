@@ -31,10 +31,10 @@ class OntologyManager:
             class Location(Thing): pass
             class ClinicalProcess(Thing): pass
             class Resource(Thing): pass
+            class Severity(Thing): pass  # Added Severity class
             
             # Conflict Classes
             class SchedulingConflict(Thing): pass
-            class EquipmentConflict(SchedulingConflict): pass
             class TheatreConflict(SchedulingConflict): pass
             class SpecializationMismatch(SchedulingConflict): pass
             class hasRecoverySchedule(Thing): pass
@@ -42,7 +42,6 @@ class OntologyManager:
             # Person Subclasses
             class Staff(Person): pass
             class Surgeon(Staff): pass
-            class Nurse(Staff): pass
             class Anesthetist(Staff): pass
             class Patient(Person): pass
             
@@ -56,21 +55,18 @@ class OntologyManager:
             class Surgery(MedicalProcedure): pass
             class TimeSlot(ClinicalProcess): pass
             
-            # Resource Subclasses
-            class SurgicalEquipment(Resource): pass
-            
             # Object Properties
             class performs_operation(ObjectProperty):
                 domain = [Surgeon]
+                range = [Surgery]
+
+            class undergoes_surgery(ObjectProperty): # Added property
+                domain = [Patient]
                 range = [Surgery]
             
             class requires_theatre_type(ObjectProperty):
                 domain = [Surgery]
                 range = [Theatre]
-            
-            class requires_equipment(ObjectProperty):
-                domain = [Surgery]
-                range = [SurgicalEquipment]
             
             class is_assigned_to(ObjectProperty):
                 domain = [Patient]
@@ -100,6 +96,10 @@ class OntologyManager:
             class works_in_theatre(ObjectProperty):
                 domain = [Staff]
                 range = [Theatre]
+
+            class has_severity(ObjectProperty): # Added property
+                domain = [Patient]
+                range = [Severity]
             
             # Data Properties
             class has_license_number(DataProperty):
@@ -126,8 +126,19 @@ class OntologyManager:
                 domain = [TimeSlot]
                 range = [int]
         
+        # Initialize default data
+        self._initialize_data(onto)
+        
         onto.save(file=self.owl_file, format="rdfxml")
         return onto
+
+    def _initialize_data(self, onto):
+        """Initialize reference data (Severity, etc.)"""
+        with onto:
+            # Create Severity Levels
+            for level in ["Severe", "Moderate", "Mild", "Minor"]:
+                if not onto.search_one(iri=f"*{level}"):
+                    onto.Severity(level)
     
     # ========== QUERY METHODS ==========
     
@@ -256,6 +267,193 @@ class OntologyManager:
         except Exception as e:
             print(f"Error adding timeslot: {e}")
             return False
+    
+    # ========== DELETE METHODS ==========
+    
+    def delete_surgery(self, surgery_name: str) -> bool:
+        """Delete a surgery and its associated patient from the ontology"""
+        try:
+            # Find the surgery
+            surgery = self.onto.search_one(iri=f"*{surgery_name}")
+            if not surgery:
+                print(f"❌ Surgery '{surgery_name}' not found")
+                return False
+            
+            # Find and delete associated patient
+            patients = [p for p in self.onto.Patient.instances() 
+                       if surgery in p.undergoes_surgery]
+            
+            for patient in patients:
+                print(f"🗑️ Deleting associated patient: {patient.name}")
+                destroy_entity(patient)
+            
+            # Delete the surgery
+            print(f"🗑️ Deleting surgery: {surgery_name}")
+            destroy_entity(surgery)
+            
+            self.save()
+            print(f"✅ Successfully deleted surgery '{surgery_name}' and associated data")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error deleting surgery: {e}")
+            return False
+    
+    def delete_patient(self, patient_name: str) -> bool:
+        """Delete a patient from the ontology"""
+        try:
+            patient = self.onto.search_one(iri=f"*{patient_name}")
+            if not patient:
+                print(f"❌ Patient '{patient_name}' not found")
+                return False
+            
+            print(f"🗑️ Deleting patient: {patient_name}")
+            destroy_entity(patient)
+            
+            self.save()
+            print(f"✅ Successfully deleted patient '{patient_name}'")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error deleting patient: {e}")
+            return False
+    
+    def delete_schedule_by_surgeon(self, surgeon_name: str) -> bool:
+        """Delete all surgeries performed by a specific surgeon"""
+        try:
+            surgeon = self.get_surgeon_by_name(surgeon_name)
+            if not surgeon:
+                print(f"❌ Surgeon '{surgeon_name}' not found")
+                return False
+            
+            surgeries = list(surgeon.performs_operation)
+            if not surgeries:
+                print(f"ℹ️ No surgeries found for surgeon '{surgeon_name}'")
+                return True
+            
+            deleted_count = 0
+            for surgery in surgeries:
+                # Find and delete associated patients
+                patients = [p for p in self.onto.Patient.instances() 
+                           if surgery in p.undergoes_surgery]
+                
+                for patient in patients:
+                    print(f"🗑️ Deleting patient: {patient.name}")
+                    destroy_entity(patient)
+                
+                print(f"🗑️ Deleting surgery: {surgery.name}")
+                destroy_entity(surgery)
+                deleted_count += 1
+            
+            self.save()
+            print(f"✅ Deleted {deleted_count} surgery(ies) for surgeon '{surgeon_name}'")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error deleting schedules: {e}")
+            return False
+    
+    def delete_schedule_by_timeslot(self, timeslot_name: str) -> bool:
+        """Delete all surgeries in a specific timeslot"""
+        try:
+            timeslot = self.onto.search_one(iri=f"*{timeslot_name}")
+            if not timeslot:
+                print(f"❌ Timeslot '{timeslot_name}' not found")
+                return False
+            
+            # Find surgeries in this timeslot
+            surgeries = [s for s in self.onto.Surgery.instances() 
+                        if s.has_timeslot and s.has_timeslot[0] == timeslot]
+            
+            if not surgeries:
+                print(f"ℹ️ No surgeries found in timeslot '{timeslot_name}'")
+                return True
+            
+            deleted_count = 0
+            for surgery in surgeries:
+                # Find and delete associated patients
+                patients = [p for p in self.onto.Patient.instances() 
+                           if surgery in p.undergoes_surgery]
+                
+                for patient in patients:
+                    print(f"🗑️ Deleting patient: {patient.name}")
+                    destroy_entity(patient)
+                
+                print(f"🗑️ Deleting surgery: {surgery.name}")
+                destroy_entity(surgery)
+                deleted_count += 1
+            
+            self.save()
+            print(f"✅ Deleted {deleted_count} surgery(ies) from timeslot '{timeslot_name}'")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error deleting schedules: {e}")
+            return False
+    
+    def delete_all_schedules(self) -> bool:
+        """Delete ALL surgeries and patients (WARNING: This clears all schedule data!)"""
+        try:
+            # Get all surgeries and patients
+            surgeries = list(self.onto.Surgery.instances())
+            patients = list(self.onto.Patient.instances())
+            
+            if not surgeries and not patients:
+                print("ℹ️ No schedules to delete")
+                return True
+            
+            # Delete all patients
+            for patient in patients:
+                print(f"🗑️ Deleting patient: {patient.name}")
+                destroy_entity(patient)
+            
+            # Delete all surgeries
+            for surgery in surgeries:
+                print(f"🗑️ Deleting surgery: {surgery.name}")
+                destroy_entity(surgery)
+            
+            self.save()
+            print(f"✅ Deleted {len(surgeries)} surgery(ies) and {len(patients)} patient(s)")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error deleting all schedules: {e}")
+            return False
+    
+    def get_schedule_info(self, surgery_name: str) -> Optional[Dict]:
+        """Get detailed information about a specific surgery schedule"""
+        try:
+            surgery = self.onto.search_one(iri=f"*{surgery_name}")
+            if not surgery:
+                return None
+            
+            # Get associated patient
+            patient = None
+            for p in self.onto.Patient.instances():
+                if surgery in p.undergoes_surgery:
+                    patient = p
+                    break
+            
+            info = {
+                'surgery_name': surgery.name,
+                'surgeon': surgery.performs_operation[0].name if surgery.performs_operation else 'N/A',
+                'theatre': surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A',
+                'timeslot': surgery.has_timeslot[0].name if surgery.has_timeslot else 'N/A',
+                'start_time': surgery.has_timeslot[0].start_time[0] if surgery.has_timeslot and surgery.has_timeslot[0].start_time else 'N/A',
+                'end_time': surgery.has_timeslot[0].end_time[0] if surgery.has_timeslot and surgery.has_timeslot[0].end_time else 'N/A',
+                'duration': surgery.estimated_duration[0] if surgery.estimated_duration else 'N/A',
+                'is_emergency': surgery.is_emergency[0] if surgery.is_emergency else False,
+                'patient_name': patient.name if patient else 'N/A',
+                'patient_ward': patient.admitted_to[0].name if patient and patient.admitted_to else 'N/A',
+                'recovery_room': patient.assigned_to_recovery[0].name if patient and patient.assigned_to_recovery else 'N/A'
+            }
+            
+            return info
+            
+        except Exception as e:
+            print(f"❌ Error getting schedule info: {e}")
+            return None
+    
     
     # ========== UTILITY METHODS ==========
     

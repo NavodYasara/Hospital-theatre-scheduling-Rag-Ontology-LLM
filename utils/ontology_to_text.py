@@ -32,11 +32,11 @@ class OntologyToText:
         surgeries_text = ", ".join(surgeries) if surgeries else "No surgeries scheduled"
         
         text = f"""Surgeon: {surgeon.name}
-License Number: {license}
-Specialization: {specialization}
-Works In: {surgeon.works_in_theatre[0].name if surgeon.works_in_theatre else 'N/A'}
-Current Surgeries: {surgeries_text}
-This surgeon is qualified to perform surgeries requiring {specialization} expertise."""
+        License Number: {license}
+        Specialization: {specialization}
+        Works In: {surgeon.works_in_theatre[0].name if surgeon.works_in_theatre else 'N/A'}
+        Current Surgeries: {surgeries_text}
+        This surgeon is qualified to perform surgeries requiring {specialization} expertise."""
         
         return text.strip()
     
@@ -56,10 +56,10 @@ This surgeon is qualified to perform surgeries requiring {specialization} expert
         theatre_type = theatre.name.replace('_Theatre', '').replace('_', ' ')
         
         text = f"""Theatre: {theatre.name}
-Type: {theatre_type}
-Specialization: {theatre_type} surgeries
-Current Schedule: {surgeries_text}
-This theatre is equipped for {theatre_type} surgical procedures."""
+        Type: {theatre_type}
+        Specialization: {theatre_type} surgeries
+        Current Schedule: {surgeries_text}
+        This theatre is equipped for {theatre_type} surgical procedures."""
         
         return text.strip()
     
@@ -77,22 +77,16 @@ This theatre is equipped for {theatre_type} surgical procedures."""
             end = ts.end_time[0] if ts.end_time else 'N/A'
             timeslot = f"{start} to {end}"
         
-        # Get equipment
-        equipment = []
-        for eq in surgery.requires_equipment:
-            equipment.append(eq.name)
-        equipment_text = ", ".join(equipment) if equipment else "No specific equipment listed"
         
         emergency_text = "This is an EMERGENCY surgery requiring immediate attention." if emergency else ""
         
         text = f"""Surgery: {surgery.name}
-Surgeon: {surgeon}
-Theatre: {theatre}
-Scheduled Time: {timeslot}
-Duration: {duration} minutes
-Emergency Status: {'EMERGENCY' if emergency else 'Routine'}
-Required Equipment: {equipment_text}
-{emergency_text}"""
+        Surgeon: {surgeon}
+        Theatre: {theatre}
+        Scheduled Time: {timeslot}
+        Duration: {duration} minutes
+        Emergency Status: {'EMERGENCY' if emergency else 'Routine'}
+        {emergency_text}"""
         
         return text.strip()
     
@@ -109,10 +103,10 @@ Required Equipment: {equipment_text}
         recovery = patient.assigned_to_recovery[0].name if patient.assigned_to_recovery else 'N/A'
         
         text = f"""Patient: {patient.name}
-Surgery Timeslot: {timeslot}
-Admitted to Ward: {ward}
-Recovery Room: {recovery}
-This patient has a scheduled surgery and post-operative recovery plan."""
+        Surgery Timeslot: {timeslot}
+        Admitted to Ward: {ward}
+        Recovery Room: {recovery}
+        This patient has a scheduled surgery and post-operative recovery plan."""
         
         return text.strip()
     
@@ -132,10 +126,10 @@ This patient has a scheduled surgery and post-operative recovery plan."""
         surgeries_text = ", ".join(surgeries) if surgeries else "Available - no surgeries scheduled"
         
         text = f"""Timeslot: {timeslot.name}
-Start Time: {start}
-End Time: {end}
-Duration: {duration} minutes
-Scheduled Surgeries: {surgeries_text}"""
+        Start Time: {start}
+        End Time: {end}
+        Duration: {duration} minutes
+        Scheduled Surgeries: {surgeries_text}"""
         
         return text.strip()
     
@@ -186,13 +180,12 @@ Scheduled Surgeries: {surgeries_text}"""
         # Add general knowledge
         documents.append({
             'text': """Hospital Scheduling Rules:
-1. Each surgeon can only perform one surgery at a time
-2. Each theatre can only host one surgery at a time
-3. Equipment cannot be used in multiple surgeries simultaneously
-4. Surgeons should operate in their specialization theatre
-5. Emergency surgeries have higher priority than routine surgeries
-6. Minimum rest time between surgeries should be respected
-7. Post-operative recovery rooms must be available""",
+                1. Each surgeon can only perform one surgery at a time
+                2. Each theatre can only host one surgery at a time
+                3. Surgeons should operate in their specialization theatre
+                4. Emergency surgeries have higher priority than routine surgeries
+                5. Minimum rest time between surgeries should be respected
+                6. Post-operative recovery rooms must be available""",
             'type': 'rules',
             'entity_id': 'scheduling_rules'
         })

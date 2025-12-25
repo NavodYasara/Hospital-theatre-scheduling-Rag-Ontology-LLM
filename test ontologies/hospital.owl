@@ -13,14 +13,14 @@
   <rdfs:range rdf:resource="#Surgery"/>
 </owl:ObjectProperty>
 
-<owl:ObjectProperty rdf:about="#undergoes_surgery">
-  <rdfs:domain rdf:resource="#Patient"/>
-  <rdfs:range rdf:resource="#Surgery"/>
-</owl:ObjectProperty>
-
 <owl:ObjectProperty rdf:about="#requires_theatre_type">
   <rdfs:domain rdf:resource="#Surgery"/>
   <rdfs:range rdf:resource="#Theatre"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#requires_equipment">
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="#SurgicalEquipment"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#is_assigned_to">
@@ -43,11 +43,6 @@
   <rdfs:range rdf:resource="#Staff"/>
 </owl:ObjectProperty>
 
-<owl:ObjectProperty rdf:about="#admitted_to">
-  <rdfs:domain rdf:resource="#Patient"/>
-  <rdfs:range rdf:resource="#Ward"/>
-</owl:ObjectProperty>
-
 <owl:ObjectProperty rdf:about="#assigned_to_recovery">
   <rdfs:domain rdf:resource="#Patient"/>
   <rdfs:range rdf:resource="#RecoveryRoom"/>
@@ -56,11 +51,6 @@
 <owl:ObjectProperty rdf:about="#works_in_theatre">
   <rdfs:domain rdf:resource="#Staff"/>
   <rdfs:range rdf:resource="#Theatre"/>
-</owl:ObjectProperty>
-
-<owl:ObjectProperty rdf:about="#has_severity">
-  <rdfs:domain rdf:resource="#Patient"/>
-  <rdfs:range rdf:resource="#Severity"/>
 </owl:ObjectProperty>
 
 <owl:DatatypeProperty rdf:about="#has_license_number">
@@ -98,15 +88,19 @@
 </owl:Class>
 
 <owl:Class rdf:about="#Surgery">
-  <rdfs:subClassOf rdf:resource="#MedicalProcedure"/>
-</owl:Class>
-
-<owl:Class rdf:about="#Patient">
-  <rdfs:subClassOf rdf:resource="#Person"/>
+  <rdfs:subClassOf rdf:resource="#ClinicalProcess"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Theatre">
   <rdfs:subClassOf rdf:resource="#Location"/>
+</owl:Class>
+
+<owl:Class rdf:about="#SurgicalEquipment">
+  <rdfs:subClassOf rdf:resource="#Resource"/>
+</owl:Class>
+
+<owl:Class rdf:about="#Patient">
+  <rdfs:subClassOf rdf:resource="#Person"/>
 </owl:Class>
 
 <owl:Class rdf:about="#TimeSlot">
@@ -117,23 +111,11 @@
   <rdfs:subClassOf rdf:resource="#Person"/>
 </owl:Class>
 
-<owl:Class rdf:about="#Ward">
-  <rdfs:subClassOf rdf:resource="#Location"/>
-</owl:Class>
-
 <owl:Class rdf:about="#RecoveryRoom">
   <rdfs:subClassOf rdf:resource="#Location"/>
 </owl:Class>
 
-<owl:Class rdf:about="#Severity">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-</owl:Class>
-
-<owl:Class rdf:about="#MedicalProcedure">
-  <rdfs:subClassOf rdf:resource="#ClinicalProcess"/>
-</owl:Class>
-
-<owl:Class rdf:about="#Person">
+<owl:Class rdf:about="#ClinicalProcess">
   <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
@@ -141,24 +123,16 @@
   <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
-<owl:Class rdf:about="#ClinicalProcess">
+<owl:Class rdf:about="#Resource">
   <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
-<owl:Class rdf:about="#Resource">
+<owl:Class rdf:about="#Person">
   <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#SchedulingConflict">
   <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-</owl:Class>
-
-<owl:Class rdf:about="#TheatreConflict">
-  <rdfs:subClassOf rdf:resource="#SchedulingConflict"/>
-</owl:Class>
-
-<owl:Class rdf:about="#SpecializationMismatch">
-  <rdfs:subClassOf rdf:resource="#SchedulingConflict"/>
 </owl:Class>
 
 <owl:Class rdf:about="#hasRecoverySchedule">
@@ -169,21 +143,17 @@
   <rdfs:subClassOf rdf:resource="#Staff"/>
 </owl:Class>
 
-<owl:NamedIndividual rdf:about="#Severe">
-  <rdf:type rdf:resource="#Severity"/>
-</owl:NamedIndividual>
+<owl:Class rdf:about="#EquipmentConflict">
+  <rdfs:subClassOf rdf:resource="#SchedulingConflict"/>
+</owl:Class>
 
-<owl:NamedIndividual rdf:about="#Moderate">
-  <rdf:type rdf:resource="#Severity"/>
-</owl:NamedIndividual>
+<owl:Class rdf:about="#TheatreConflict">
+  <rdfs:subClassOf rdf:resource="#SchedulingConflict"/>
+</owl:Class>
 
-<owl:NamedIndividual rdf:about="#Mild">
-  <rdf:type rdf:resource="#Severity"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Minor">
-  <rdf:type rdf:resource="#Severity"/>
-</owl:NamedIndividual>
+<owl:Class rdf:about="#SpecializationMismatch">
+  <rdfs:subClassOf rdf:resource="#SchedulingConflict"/>
+</owl:Class>
 
 <owl:NamedIndividual rdf:about="#Neuro_Theatre">
   <rdf:type rdf:resource="#Theatre"/>
@@ -201,32 +171,28 @@
   <rdf:type rdf:resource="#Theatre"/>
 </owl:NamedIndividual>
 
-<owl:NamedIndividual rdf:about="#Cardiology_Ward">
-  <rdf:type rdf:resource="#Ward"/>
+<owl:NamedIndividual rdf:about="#Dr_Smith">
+  <rdf:type rdf:resource="#Surgeon"/>
+  <works_in_theatre rdf:resource="#Neuro_Theatre"/>
+  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">NS12345</has_license_number>
 </owl:NamedIndividual>
 
-<owl:NamedIndividual rdf:about="#Neurology_Ward">
-  <rdf:type rdf:resource="#Ward"/>
+<owl:NamedIndividual rdf:about="#Dr_Johnson">
+  <rdf:type rdf:resource="#Surgeon"/>
+  <works_in_theatre rdf:resource="#Ortho_Theatre"/>
+  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OS67890</has_license_number>
 </owl:NamedIndividual>
 
-<owl:NamedIndividual rdf:about="#Orthopedic_Ward">
-  <rdf:type rdf:resource="#Ward"/>
+<owl:NamedIndividual rdf:about="#Dr_Williams">
+  <rdf:type rdf:resource="#Surgeon"/>
+  <works_in_theatre rdf:resource="#Cardio_Theatre"/>
+  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CS78901</has_license_number>
 </owl:NamedIndividual>
 
-<owl:NamedIndividual rdf:about="#General_Ward">
-  <rdf:type rdf:resource="#Ward"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Recovery_Room_C">
-  <rdf:type rdf:resource="#RecoveryRoom"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Recovery_Room_B">
-  <rdf:type rdf:resource="#RecoveryRoom"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Recovery_Room_A">
-  <rdf:type rdf:resource="#RecoveryRoom"/>
+<owl:NamedIndividual rdf:about="#Dr_Brown">
+  <rdf:type rdf:resource="#Surgeon"/>
+  <works_in_theatre rdf:resource="#General_Theatre"/>
+  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">GS34567</has_license_number>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#TimeSlot_08_00">
@@ -257,37 +223,13 @@
   <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</duration>
 </owl:NamedIndividual>
 
-<owl:NamedIndividual rdf:about="#Dr_Smith">
-  <rdf:type rdf:resource="#Surgeon"/>
-  <works_in_theatre rdf:resource="#Neuro_Theatre"/>
-  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">NS12345</has_license_number>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Dr_Johnson">
-  <rdf:type rdf:resource="#Surgeon"/>
-  <works_in_theatre rdf:resource="#Ortho_Theatre"/>
-  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OS67890</has_license_number>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Dr_Williams">
-  <rdf:type rdf:resource="#Surgeon"/>
-  <works_in_theatre rdf:resource="#Cardio_Theatre"/>
-  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CS78901</has_license_number>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Dr_Brown">
-  <rdf:type rdf:resource="#Surgeon"/>
-  <works_in_theatre rdf:resource="#General_Theatre"/>
-  <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#string">GS34567</has_license_number>
-</owl:NamedIndividual>
-
 <owl:NamedIndividual rdf:about="#Brain_Surgery">
   <rdf:type rdf:resource="#Surgery"/>
   <performs_operation rdf:resource="#Dr_Smith"/>
   <requires_theatre_type rdf:resource="#Neuro_Theatre"/>
   <has_timeslot rdf:resource="#TimeSlot_08_00"/>
-  <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">200</estimated_duration>
-  <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</is_emergency>
+  <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">180</estimated_duration>
+  <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</is_emergency>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Cardiac_Bypass_Surgery">
@@ -317,45 +259,13 @@
   <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</is_emergency>
 </owl:NamedIndividual>
 
-<owl:NamedIndividual rdf:about="#Patient_John_Doe">
-  <rdf:type rdf:resource="#Patient"/>
-  <admitted_to rdf:resource="#Neurology_Ward"/>
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
-  <is_assigned_to rdf:resource="#TimeSlot_08_00"/>
-  <undergoes_surgery rdf:resource="#Brain_Surgery"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Patient_Mary_Smith">
-  <rdf:type rdf:resource="#Patient"/>
-  <admitted_to rdf:resource="#Cardiology_Ward"/>
-  <assigned_to_recovery rdf:resource="#Recovery_Room_B"/>
-  <is_assigned_to rdf:resource="#TimeSlot_10_45"/>
-  <undergoes_surgery rdf:resource="#Cardiac_Bypass_Surgery"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Patient_Robert_Johnson">
-  <rdf:type rdf:resource="#Patient"/>
-  <admitted_to rdf:resource="#Orthopedic_Ward"/>
-  <assigned_to_recovery rdf:resource="#Recovery_Room_C"/>
-  <is_assigned_to rdf:resource="#TimeSlot_14_00"/>
-  <undergoes_surgery rdf:resource="#Hip_Replacement_Surgery"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Patient_Linda_Williams">
-  <rdf:type rdf:resource="#Patient"/>
-  <admitted_to rdf:resource="#General_Ward"/>
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
-  <is_assigned_to rdf:resource="#TimeSlot_16_45"/>
-  <undergoes_surgery rdf:resource="#Appendectomy"/>
-</owl:NamedIndividual>
-
-<owl:NamedIndividual rdf:about="#Patient1">
-  <rdf:type rdf:resource="#Patient"/>
-  <has_severity rdf:resource="#Severe"/>
-  <is_assigned_to rdf:resource="#TimeSlot_08_00"/>
-  <admitted_to rdf:resource="#Neurology_Ward"/>
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
-  <undergoes_surgery rdf:resource="#Brain_Surgery"/>
+<owl:NamedIndividual rdf:about="#Knee arthoscopy">
+  <rdf:type rdf:resource="#Surgery"/>
+  <performs_operation rdf:resource="#Dr_Smith"/>
+  <requires_theatre_type rdf:resource="#Neuro_Theatre"/>
+  <has_timeslot rdf:resource="#TimeSlot_08_00"/>
+  <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">120</estimated_duration>
+  <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</is_emergency>
 </owl:NamedIndividual>
 
 
