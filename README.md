@@ -23,7 +23,6 @@ An **Ontology-Guided RAG (Retrieval-Augmented Generation) System** that combines
 - [Configuration](#-configuration)
 - [Example Queries](#-example-queries)
 - [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
 - [License](#-license)
 
 ---
@@ -682,25 +681,7 @@ print(retriever.get_formatted_context(context))
 
 ---
 
-## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/AmazingFeature`)
-3. **Commit your changes** (`git commit -m 'Add some AmazingFeature'`)
-4. **Push to the branch** (`git push origin feature/AmazingFeature`)
-5. **Open a Pull Request**
-
-### Areas for Contribution
-
-- 📅 Date-aware scheduling (multi-day support)
-- 🧪 Testing suite (unit & integration tests)
-- 📊 Analytics dashboard
-- 🔔 Notification system
-- 📱 Mobile-responsive UI
-- 🌐 Internationalization (i18n)
-- 📖 Enhanced documentation
 
 ---
 
@@ -720,18 +701,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Contact & Support
-
-**Project Maintainer:** Navod Yasara  
-**Repository:** [github.com/NavodYasara/hospital-theatre-scheduling-rag](https://github.com/NavodYasara/hospital-theatre-scheduling-rag)
-
-### Getting Help
-
-- 📖 Check the [Troubleshooting](#-troubleshooting) section
-- 🐛 Report bugs via [GitHub Issues](https://github.com/NavodYasara/hospital-theatre-scheduling-rag/issues)
-- 💬 Ask questions in [Discussions](https://github.com/NavodYasara/hospital-theatre-scheduling-rag/discussions)
-
----
 
 ## 🎓 Academic Use
 
@@ -756,39 +725,3 @@ This project is suitable for:
 
 ---
 
-## 🗺️ Roadmap
-
-### Current Version (v1.0)
-
-- ✅ Basic ontology with SWRL rules
-- ✅ RAG pipeline with vector search
-- ✅ Conflict detection
-- ✅ Streamlit UI
-- ✅ Chat interface
-
-### Planned Features (v2.0)
-
-- 📅 Multi-day scheduling
-- 🔔 Conflict notifications
-- 📊 Analytics dashboard
-- 📱 Mobile app
-- 🧪 Testing suite
-- 🐳 Docker deployment
-
-### Future Enhancements (v3.0)
-
-- 🤖 ML-powered predictions
-- 🌐 Multi-hospital support
-- 🔐 Authentication & authorization
-- 📈 Advanced analytics
-- 🔄 Real-time collaboration
-
----
-
-<div align="center">
-
-**⭐ Star this repository if you find it helpful!**
-
-Made with ❤️ for better healthcare scheduling
-
-</div>
