@@ -62,12 +62,12 @@ with onto:
     # Data Properties
     class has_license_number(DataProperty):
         domain = [Surgeon];range = [str] #Surgeon has license number
-    class severity_level(DataProperty):  # RENAMED from 'severity' to avoid confusion
+    class severity_level(DataProperty):  
         domain = [Severity];range = [str] #Severity level description
     class estimated_duration(DataProperty):
         domain = [Surgery];range = [int] #Surgery has estimated duration
     class is_emergency(DataProperty):
-        domain = [Surgery];range = [bool] #Surgery is emergency (FIXED: was incorrectly used on Patient)
+        domain = [Surgery];range = [bool] #Surgery is emergency 
     class start_time(DataProperty):
         domain = [TimeSlot];range = [str] #TimeSlot start time
     class end_time(DataProperty):
