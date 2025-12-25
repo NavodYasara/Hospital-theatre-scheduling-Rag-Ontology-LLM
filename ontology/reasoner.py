@@ -138,26 +138,56 @@ class ConflictDetector:
             required_theatre = surgery.requires_theatre_type[0]
             
             if surgeon.works_in_theatre:
-                surgeon_theatre = surgeon.works_in_theatre[0]
+                surgeon_theatres = surgeon.works_in_theatre
                 
-                if surgeon_theatre != required_theatre:
+                if required_theatre not in surgeon_theatres:
+                    # Create readable list of allowed theatres
+                    allowed_names = ", ".join([t.name for t in surgeon_theatres])
                     mismatches.append({
                         'type': 'Specialization Mismatch',
                         'surgeon': surgeon.name,
                         'surgery': surgery.name,
-                        'surgeon_theatre': surgeon_theatre.name,
+                        'surgeon_theatre': allowed_names,  # Keep key for compatibility, but content is list
                         'required_theatre': required_theatre.name,
                         'severity': 'MEDIUM',
-                        'description': f"{surgeon.name} works in {surgeon_theatre.name} but surgery requires {required_theatre.name}"
+                        'description': f"{surgeon.name} is authorized for [{allowed_names}] but surgery requires {required_theatre.name}"
                     })
         
         return mismatches
     
+    def check_patient_conflicts(self, patient_name: str = None) -> List[Dict]:
+        """Check if patient has overlapping surgeries"""
+        conflicts = []
+        
+        patients = [self.onto.search_one(iri=f"*{patient_name}")] if patient_name else self.onto_mgr.get_all_patients()
+        
+        for patient in patients:
+            if not patient:
+                continue
+            
+            # Get all surgeries for this patient
+            surgeries = patient.undergoes_surgery
+            
+            # Compare all pairs
+            for i in range(len(surgeries)):
+                for j in range(i + 1, len(surgeries)):
+                    if self._surgeries_overlap(surgeries[i], surgeries[j]):
+                        conflicts.append({
+                            'type': 'Patient Double-Booking',
+                            'patient': patient.name,
+                            'surgery1': surgeries[i].name,
+                            'surgery2': surgeries[j].name,
+                            'severity': 'CRITICAL',
+                            'description': f"Patient {patient.name} is scheduled for two surgeries at overlapping times"
+                        })
+        return conflicts
+
     def detect_all_conflicts(self) -> Dict[str, List[Dict]]:
         """Run all conflict detection checks"""
         return {
             'surgeon_conflicts': self.check_surgeon_conflicts(),
             'theatre_conflicts': self.check_theatre_conflicts(),
+            'patient_conflicts': self.check_patient_conflicts(),
             'specialization_mismatches': self.check_specialization_mismatches()
         }
     
@@ -172,10 +202,10 @@ class ConflictDetector:
         ts2 = surgery2.has_timeslot[0]
         
         # Check if timeslots have temporal overlap property
-        if ts2 in ts1.has_temporal_overlap:
+        if hasattr(ts1, 'has_temporal_overlap') and ts2 in ts1.has_temporal_overlap:
             return True
         
-        # Also check time strings
+        # Check time strings using robust parsing
         if ts1.start_time and ts1.end_time and ts2.start_time and ts2.end_time:
             return self._times_overlap(
                 ts1.start_time[0], ts1.end_time[0],
@@ -185,15 +215,28 @@ class ConflictDetector:
         return False
     
     def _times_overlap(self, start1: str, end1: str, start2: str, end2: str) -> bool:
-        """Check if two time ranges overlap"""
+        """Check if two time ranges overlap using datetime objects"""
         try:
-            # Convert strings to comparable format (HH:MM)
-            s1 = start1.replace(':', '')
-            e1 = end1.replace(':', '')
-            s2 = start2.replace(':', '')
-            e2 = end2.replace(':', '')
+            # Helper to parse time string
+            def parse_time(t_str):
+                # Try multiple formats
+                for fmt in ["%H:%M", "%H:%M:%S", "%I:%M %p"]:
+                    try:
+                        return datetime.strptime(t_str.strip(), fmt).time()
+                    except ValueError:
+                        continue
+                return None
+
+            s1 = parse_time(start1)
+            e1 = parse_time(end1)
+            s2 = parse_time(start2)
+            e2 = parse_time(end2)
+
+            if not all([s1, e1, s2, e2]):
+                return False
             
             # Check overlap: start1 < end2 AND start2 < end1
             return s1 < e2 and s2 < e1
-        except:
+        except Exception as e:
+            print(f"Time comparison error: {e}")
             return False

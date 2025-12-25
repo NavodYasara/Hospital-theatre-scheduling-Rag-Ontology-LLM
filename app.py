@@ -104,11 +104,12 @@ def main():
     st.caption("Powered by Ontology + RAG + Ollama LLM")
     
     # Create tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "💬 Chat Assistant", 
         "🔍 Conflict Detection", 
         "📊 Schedule View",
-        "➕ Add Schedule"
+        "➕ Add Schedule",
+        "🗑️ Delete Schedule"
     ])
     
     # TAB 1: Chat Assistant
@@ -203,7 +204,19 @@ def main():
                     st.error(f"⚠️ Found {total_conflicts} conflict(s)")
                     
                     # Display conflicts by type
-                    if conflicts['surgeon_conflicts']:
+                    if conflicts.get('patient_conflicts'):
+                        st.subheader("👤 Patient Double-Bookings (CRITICAL)")
+                        for conflict in conflicts['patient_conflicts']:
+                            with st.expander(f"🚫 {conflict['patient']} - {conflict['severity']} SEVERITY", expanded=True):
+                                st.error(f"**Description:** {conflict['description']}")
+                                st.write(f"**Conflicting Surgeries:**")
+                                st.write(f"- {conflict['surgery1']}")
+                                st.write(f"- {conflict['surgery2']}")
+                                
+                                st.markdown("**💡 Suggested Resolution:**")
+                                st.info("IMMEDIATELY reschedule one surgery. A patient cannot be in two places at once.")
+
+                    if conflicts.get('surgeon_conflicts'):
                         st.subheader("👨‍⚕️ Surgeon Double-Bookings")
                         for conflict in conflicts['surgeon_conflicts']:
                             with st.expander(f"⚠️ {conflict['surgeon']} - {conflict['severity']} SEVERITY"):
@@ -557,6 +570,188 @@ def main():
         with col3:
             if st.button("🔄 Reset Form"):
                 st.rerun()
+    
+    # TAB 5: Delete Schedule
+    with tab5:
+        st.header("🗑️ Delete Surgery Schedules")
+        
+        st.warning("⚠️ **Warning:** Deleting a schedule will permanently remove the surgery and associated patient data from the ontology.")
+        
+        # Delete options
+        delete_option = st.radio(
+            "Select deletion method:",
+            ["Delete Specific Surgery", "Delete by Surgeon", "Delete by Timeslot", "Delete All Schedules"],
+            horizontal=False
+        )
+        
+        st.markdown("---")
+        
+        if delete_option == "Delete Specific Surgery":
+            st.subheader("🔍 Delete a Specific Surgery")
+            
+            # Get all surgeries
+            surgeries = onto_mgr.get_all_surgeries()
+            surgery_names = [s.name for s in surgeries]
+            
+            if surgery_names:
+                selected_surgery = st.selectbox("Select Surgery to Delete:", surgery_names)
+                
+                # Show surgery details
+                if selected_surgery:
+                    st.markdown("### 📋 Surgery Details")
+                    info = onto_mgr.get_schedule_info(selected_surgery)
+                    
+                    if info:
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"**Surgery:** {info['surgery_name']}")
+                            st.write(f"**Surgeon:** {info['surgeon']}")
+                            st.write(f"**Theatre:** {info['theatre']}")
+                            st.write(f"**Time:** {info['start_time']} - {info['end_time']}")
+                        with col2:
+                            st.write(f"**Patient:** {info['patient_name']}")
+                            st.write(f"**Ward:** {info['patient_ward']}")
+                            st.write(f"**Recovery Room:** {info['recovery_room']}")
+                            st.write(f"**Emergency:** {'Yes' if info['is_emergency'] else 'No'}")
+                    
+                    st.markdown("---")
+                    
+                    col1, col2 = st.columns([1, 3])
+                    with col1:
+                        if st.button("🗑️ Delete Surgery", type="primary", key="delete_single"):
+                            with st.spinner("Deleting surgery..."):
+                                success = onto_mgr.delete_surgery(selected_surgery)
+                                if success:
+                                    st.success(f"✅ Successfully deleted surgery '{selected_surgery}'")
+                                    st.info("💡 Refreshing data...")
+                                    st.cache_resource.clear()
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Failed to delete surgery")
+            else:
+                st.info("No surgeries found in the system")
+        
+        elif delete_option == "Delete by Surgeon":
+            st.subheader("👨‍⚕️ Delete All Surgeries by Surgeon")
+            
+            surgeons = onto_mgr.get_all_surgeons()
+            surgeon_names = [s.name for s in surgeons]
+            
+            if surgeon_names:
+                selected_surgeon = st.selectbox("Select Surgeon:", surgeon_names)
+                
+                # Show surgeon's schedule
+                if selected_surgeon:
+                    st.markdown("### 📅 Surgeon's Current Schedule")
+                    schedule = onto_mgr.get_surgeon_schedule(selected_surgeon)
+                    
+                    if schedule:
+                        for item in schedule:
+                            with st.container():
+                                col1, col2, col3 = st.columns(3)
+                                col1.write(f"**{item['surgery']}**")
+                                col2.write(f"🕐 {item['start_time']} - {item['end_time']}")
+                                col3.write(f"🏥 {item['theatre']}")
+                                st.markdown("---")
+                        
+                        st.warning(f"⚠️ This will delete **{len(schedule)} surgery(ies)** and associated patient data")
+                        
+                        col1, col2 = st.columns([1, 3])
+                        with col1:
+                            if st.button("🗑️ Delete All", type="primary", key="delete_surgeon"):
+                                with st.spinner(f"Deleting schedules for {selected_surgeon}..."):
+                                    success = onto_mgr.delete_schedule_by_surgeon(selected_surgeon)
+                                    if success:
+                                        st.success(f"✅ Successfully deleted all schedules for '{selected_surgeon}'")
+                                        st.cache_resource.clear()
+                                        st.rerun()
+                                    else:
+                                        st.error("❌ Failed to delete schedules")
+                    else:
+                        st.info(f"No surgeries scheduled for {selected_surgeon}")
+            else:
+                st.info("No surgeons found in the system")
+        
+        elif delete_option == "Delete by Timeslot":
+            st.subheader("⏰ Delete All Surgeries in a Timeslot")
+            
+            timeslots = onto_mgr.get_all_timeslots()
+            timeslot_names = [f"{ts.name} ({ts.start_time[0] if ts.start_time else 'N/A'} - {ts.end_time[0] if ts.end_time else 'N/A'})" 
+                             for ts in timeslots]
+            
+            if timeslot_names:
+                selected_timeslot_display = st.selectbox("Select Timeslot:", timeslot_names)
+                selected_timeslot = timeslots[timeslot_names.index(selected_timeslot_display)].name
+                
+                # Show surgeries in this timeslot
+                if selected_timeslot:
+                    st.markdown("### 📋 Surgeries in This Timeslot")
+                    surgeries_in_slot = [s for s in onto_mgr.get_all_surgeries() 
+                                        if s.has_timeslot and s.has_timeslot[0].name == selected_timeslot]
+                    
+                    if surgeries_in_slot:
+                        for surgery in surgeries_in_slot:
+                            with st.container():
+                                col1, col2, col3 = st.columns(3)
+                                col1.write(f"**{surgery.name}**")
+                                surgeon = surgery.performs_operation[0].name if surgery.performs_operation else 'N/A'
+                                col2.write(f"👨‍⚕️ {surgeon}")
+                                theatre = surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A'
+                                col3.write(f"🏥 {theatre}")
+                                st.markdown("---")
+                        
+                        st.warning(f"⚠️ This will delete **{len(surgeries_in_slot)} surgery(ies)** and associated patient data")
+                        
+                        col1, col2 = st.columns([1, 3])
+                        with col1:
+                            if st.button("🗑️ Delete All", type="primary", key="delete_timeslot"):
+                                with st.spinner(f"Deleting schedules in timeslot..."):
+                                    success = onto_mgr.delete_schedule_by_timeslot(selected_timeslot)
+                                    if success:
+                                        st.success(f"✅ Successfully deleted all schedules in timeslot")
+                                        st.cache_resource.clear()
+                                        st.rerun()
+                                    else:
+                                        st.error("❌ Failed to delete schedules")
+                    else:
+                        st.info(f"No surgeries scheduled in this timeslot")
+            else:
+                st.info("No timeslots found in the system")
+        
+        elif delete_option == "Delete All Schedules":
+            st.subheader("⚠️ Delete ALL Schedules")
+            
+            st.error("🚨 **DANGER ZONE** 🚨")
+            st.warning("This will permanently delete ALL surgeries and patients from the system!")
+            
+            # Show current statistics
+            summary = onto_mgr.get_ontology_summary()
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Total Surgeries", summary['surgeries'])
+            with col2:
+                st.metric("Total Patients", summary['patients'])
+            
+            st.markdown("---")
+            
+            # Confirmation checkbox
+            confirm = st.checkbox("I understand this action cannot be undone")
+            
+            if confirm:
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    if st.button("🗑️ DELETE ALL", type="primary", key="delete_all"):
+                        with st.spinner("Deleting all schedules..."):
+                            success = onto_mgr.delete_all_schedules()
+                            if success:
+                                st.success("✅ Successfully deleted all schedules")
+                                st.cache_resource.clear()
+                                st.rerun()
+                            else:
+                                st.error("❌ Failed to delete schedules")
+            else:
+                st.info("👆 Check the box above to enable deletion")
 
 if __name__ == "__main__":
     main()
