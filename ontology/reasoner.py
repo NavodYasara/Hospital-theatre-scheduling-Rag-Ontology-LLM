@@ -53,12 +53,6 @@ class ConflictDetector:
                 -> SpecializationMismatch(?s)
             """)
             
-            # Rule 4: Recovery Schedule
-            rule4 = Imp()
-            rule4.set_as_rule("""
-                Patient(?p), is_assigned_to(?p, ?t), assigned_to_recovery(?p, ?r)
-                -> hasRecoverySchedule(?p)
-            """)
         
         self.onto_mgr.save()
         print("✅ SWRL rules added")

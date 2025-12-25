@@ -506,10 +506,8 @@ def main():
                                     if severity_instance:
                                         patient.has_severity = [severity_instance]
                                     
-                                    # Find timeslot
-                                    timeslot_instance = onto_mgr.onto.search_one(iri=f"*{selected_timeslot}")
-                                    if timeslot_instance:
-                                        patient.is_assigned_to = [timeslot_instance]
+                                    # Find TimeSlot
+                                    
                                     
                                     # Find ward
                                     ward_instance = onto_mgr.onto.search_one(iri=f"*{selected_ward}")

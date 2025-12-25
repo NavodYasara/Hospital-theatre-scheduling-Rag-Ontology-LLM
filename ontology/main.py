@@ -10,7 +10,7 @@ with onto:
     class Person(Thing):pass #Superclass for all human actors
     class Location(Thing):pass #Superclass for all physical locations
     class ClinicalProcess(Thing):pass #Superclass for clinical processes
-    class Resource(Thing):pass #Superclass for hospital resources
+    class TimeEntity(Thing):pass #Superclass for time-related entities
     class SchedulingConflict(Thing):pass # Conflict Detection Classes
     class hasRecoverySchedule(Thing):pass #Marker class for recovery scheduling
     class Severity(Thing):pass #Severity classification
@@ -20,60 +20,92 @@ with onto:
     
     # Person Subclasses
     class Staff(Person):pass #Superclass for all staff
-    class Surgeon(Staff):pass #Surgeon
-    class Anesthetist(Staff):pass #Anesthetist
+    class Surgeon(Staff):pass #Surgeon base class
+    class NeuroSurgeon(Surgeon):pass #Neurosurgeon
+    class OrthopedicSurgeon(Surgeon):pass #Orthopedic surgeon
+    class GeneralSurgeon(Surgeon):pass #General surgeon
+    class Anaesthetist(Staff):pass #Anaesthetist
+    class Nurse(Staff):pass #Nurse
     class Patient(Person):pass #Patient
     
     # Location Subclasses
-    class Theatre(Location):pass #Theatre
+    class Theatre(Location):pass #Theatre base class
+    class NeuroTheatre(Theatre):pass #Neurosurgery theatre
+    class OrthoTheatre(Theatre):pass #Orthopedic theatre
+    class CardioTheatre(Theatre):pass #Cardiothoracic theatre
+    class GeneralTheatre(Theatre):pass #General surgery theatre
     class Ward(Location):pass #Ward
     class RecoveryRoom(Location):pass #Recovery Room
     
     # Clinical Process Subclasses
     class MedicalProcedure(ClinicalProcess):pass #Medical Procedure
     class Surgery(MedicalProcedure):pass #Surgery
-    class TimeSlot(ClinicalProcess):pass #TimeSlot
+    
+    # TimeEntity Subclasses
+    class TimeSlot(TimeEntity):pass #TimeSlot
     
     
     # Object Properties
     class performs_operation(ObjectProperty):
         domain = [Surgeon];range = [Surgery] #Surgeon performs surgery
-    class has_severity(ObjectProperty):
-        domain = [Patient];range = [Severity] #Patient has severity
-    class requires_theatre_type(ObjectProperty):
-        domain = [Surgery];range = [Theatre] #Surgery requires theatre type
-    class is_assigned_to(ObjectProperty):
-        domain = [Patient];range = [TimeSlot] #Patient is assigned to timeslot
     class has_timeslot(ObjectProperty):
         domain = [Surgery];range = [TimeSlot] #Surgery has timeslot
+    class occurs_in(ObjectProperty):
+        domain = [ClinicalProcess];range = [Location] #ClinicalProcess occurs in Location
+    class has_severity(ObjectProperty):
+        domain = [Patient];range = [Severity] #Patient has severity
     class has_temporal_overlap(ObjectProperty):
         domain = [TimeSlot];range = [TimeSlot];symmetric = True #Timeslots have temporal overlap
+    class available_during(ObjectProperty):
+        domain = [Staff];range = [TimeSlot] #Staff available during TimeSlot
+    class assigned_to_surgery(ObjectProperty):
+        domain = [Staff];range = [Surgery] #Staff assigned to surgery
+    class on_duty_in(ObjectProperty):
+        domain = [Staff];range = [Ward] #Staff on duty in Ward
+    class scheduled_for(ObjectProperty):
+        domain = [Patient];range = [Surgery] #Patient scheduled for Surgery
+    class admitted_at_time(ObjectProperty):
+        domain = [Patient];range = [TimeSlot] #Patient admitted at time
+    class discharged_from(ObjectProperty):
+        domain = [Patient];range = [Ward] #Patient discharged from Ward
+    class requires_postop_care_in(ObjectProperty):
+        domain = [Surgery];range = [Location] #Surgery requires postop care in Location
+    class assigned_to_recovery(ObjectProperty):
+        domain = [Patient];range = [RecoveryRoom] #Patient assigned to recovery room
+    class works_in_theatre(ObjectProperty):
+        domain = [Staff];range = [Theatre] #Staff works in Theatre
+    class admitted_to(ObjectProperty):
+        domain = [Patient];range = [Ward] #Patient admitted to Ward
     class has_assigned_staff(ObjectProperty):
         domain = [Surgery];range = [Staff] #Surgery has assigned staff
-    class admitted_to(ObjectProperty):
-        domain = [Patient];range = [Ward] #Patient is admitted to ward
-    class assigned_to_recovery(ObjectProperty):
-        domain = [Patient];range = [RecoveryRoom] #Patient is assigned to recovery room
-    class works_in_theatre(ObjectProperty):
-        domain = [Staff];range = [Theatre]
+    class requires_theatre_type(ObjectProperty):
+        domain = [Surgery];range = [Theatre] #Surgery requires theatre type
     class undergoes_surgery(ObjectProperty): 
-        domain = [Patient];range = [Surgery]
+        domain = [Patient];range = [Surgery] #Patient undergoes surgery
     
     # Data Properties
     class has_license_number(DataProperty):
-        domain = [Surgeon];range = [str] #Surgeon has license number
+        domain = [Surgeon];range = [int] #Surgeon has license number
     class severity_level(DataProperty):  
         domain = [Severity];range = [str] #Severity level description
     class estimated_duration(DataProperty):
         domain = [Surgery];range = [int] #Surgery has estimated duration
-    class is_emergency(DataProperty):
-        domain = [Surgery];range = [bool] #Surgery is emergency 
-    class start_time(DataProperty):
-        domain = [TimeSlot];range = [str] #TimeSlot start time
-    class end_time(DataProperty):
-        domain = [TimeSlot];range = [str] #TimeSlot end time
     class duration(DataProperty):
         domain = [TimeSlot];range = [int] #TimeSlot duration
+    class availability_status(DataProperty):
+        domain = [Staff];range = [bool] #Staff availability status
+    class is_emergency(DataProperty):
+        domain = [Surgery];range = [bool] #Surgery is emergency
+    class surgery_status(DataProperty):
+        domain = [Surgery];range = [str] #Surgery status
+    class start_time(DataProperty):
+        domain = [TimeSlot];range = [str] #TimeSlot start time (DateTime as string)
+    class end_time(DataProperty):
+        domain = [TimeSlot];range = [str] #TimeSlot end time (DateTime as string)
+    class actual_start_time(DataProperty):
+        domain = [Surgery];range = [str] #Surgery actual start time (DateTime as string)
+    class actual_end_time(DataProperty):
+        domain = [Surgery];range = [str] #Surgery actual end time (DateTime as string)
 
 # Create Instances
 
@@ -130,75 +162,75 @@ TS5.has_temporal_overlap = [TS6]
 TS6.has_temporal_overlap = [TS5] 
 
 # Phase 2: Theatres
-NeuroTheatre = onto.Theatre("Neuro_Theatre")
-OrthoTheatre = onto.Theatre("Ortho_Theatre")
-CardioTheatre = onto.Theatre("Cardio_Theatre")
-GeneralTheatre = onto.Theatre("General_Theatre")
+NeuroTheatreInst = onto.NeuroTheatre("Neuro_Theatre")
+OrthoTheatreInst = onto.OrthoTheatre("Ortho_Theatre")
+CardioTheatreInst = onto.CardioTheatre("Cardio_Theatre")
+GeneralTheatreInst = onto.GeneralTheatre("General_Theatre")
 
 # Phase 3: Surgeons
-NeuroSurgeon = onto.Surgeon("Dr_Smith")
-NeuroSurgeon.has_license_number = ["NS12345"]
-NeuroSurgeon.works_in_theatre = [NeuroTheatre]
+NeuroSurgeonInst = onto.NeuroSurgeon("Dr_Smith")
+NeuroSurgeonInst.has_license_number = [12345]
+NeuroSurgeonInst.works_in_theatre = [NeuroTheatreInst]
 
-OrthopedicSurgeon = onto.Surgeon("Dr_Johnson")
-OrthopedicSurgeon.has_license_number = ["OS67890"]
-OrthopedicSurgeon.works_in_theatre = [OrthoTheatre]
+OrthopedicSurgeonInst = onto.OrthopedicSurgeon("Dr_Johnson")
+OrthopedicSurgeonInst.has_license_number = [67890]
+OrthopedicSurgeonInst.works_in_theatre = [OrthoTheatreInst]
 
-CardiothoracicSurgeon = onto.Surgeon("Dr_Williams")
-CardiothoracicSurgeon.has_license_number = ["CS78901"]
-CardiothoracicSurgeon.works_in_theatre = [CardioTheatre]
+CardiothoracicSurgeonInst = onto.GeneralSurgeon("Dr_Williams")
+CardiothoracicSurgeonInst.has_license_number = [78901]
+CardiothoracicSurgeonInst.works_in_theatre = [CardioTheatreInst]
 
-GeneralSurgeon = onto.Surgeon("Dr_Brown")
-GeneralSurgeon.has_license_number = ["GS34567"]
-GeneralSurgeon.works_in_theatre = [GeneralTheatre]
+GeneralSurgeonInst = onto.GeneralSurgeon("Dr_Brown")
+GeneralSurgeonInst.has_license_number = [34567]
+GeneralSurgeonInst.works_in_theatre = [GeneralTheatreInst]
 
 
-# Phase 4: Anesthetists
-Anesthetist1 = onto.Anesthetist("Anesthetist_Michael")
-Anesthetist1.works_in_theatre = [NeuroTheatre]
+# Phase 4: Anaesthetists
+Anaesthetist1 = onto.Anaesthetist("Anaesthetist_Michael")
+Anaesthetist1.works_in_theatre = [NeuroTheatreInst]
 
-Anesthetist2 = onto.Anesthetist("Anesthetist_David")
-Anesthetist2.works_in_theatre = [OrthoTheatre]
+Anaesthetist2 = onto.Anaesthetist("Anaesthetist_David")
+Anaesthetist2.works_in_theatre = [OrthoTheatreInst]
 
-Anesthetist3 = onto.Anesthetist("Anesthetist_Elijah")
-Anesthetist3.works_in_theatre = [CardioTheatre]
+Anaesthetist3 = onto.Anaesthetist("Anaesthetist_Elijah")
+Anaesthetist3.works_in_theatre = [CardioTheatreInst]
 
-Anesthetist4 = onto.Anesthetist("Anesthetist_Frank")
-Anesthetist4.works_in_theatre = [GeneralTheatre]
+Anaesthetist4 = onto.Anaesthetist("Anaesthetist_Frank")
+Anaesthetist4.works_in_theatre = [GeneralTheatreInst]
 
 
 # Phase 6: Surgeries 
 BrainSurgery = onto.Surgery("Brain_Surgery")
 BrainSurgery.estimated_duration = [180]
 BrainSurgery.is_emergency = [True] 
-BrainSurgery.requires_theatre_type = [NeuroTheatre]
+BrainSurgery.requires_theatre_type = [NeuroTheatreInst]
 BrainSurgery.has_timeslot = [TS1]
-BrainSurgery.has_assigned_staff = [NeuroSurgeon, Anesthetist1]  
-NeuroSurgeon.performs_operation = [BrainSurgery]
+BrainSurgery.has_assigned_staff = [NeuroSurgeonInst, Anaesthetist1]  
+NeuroSurgeonInst.performs_operation = [BrainSurgery]
 
 CardiacSurgery = onto.Surgery("Cardiac_Bypass_Surgery")
 CardiacSurgery.estimated_duration = [240]
 CardiacSurgery.is_emergency = [False] 
-CardiacSurgery.requires_theatre_type = [CardioTheatre]
+CardiacSurgery.requires_theatre_type = [CardioTheatreInst]
 CardiacSurgery.has_timeslot = [TS2]
-CardiacSurgery.has_assigned_staff = [CardiothoracicSurgeon, Anesthetist3] 
-CardiothoracicSurgeon.performs_operation = [CardiacSurgery] 
+CardiacSurgery.has_assigned_staff = [CardiothoracicSurgeonInst, Anaesthetist3] 
+CardiothoracicSurgeonInst.performs_operation = [CardiacSurgery] 
 
 OrthopedicSurgery = onto.Surgery("Hip_Replacement_Surgery")
 OrthopedicSurgery.estimated_duration = [120]
 OrthopedicSurgery.is_emergency = [False] 
-OrthopedicSurgery.requires_theatre_type = [OrthoTheatre]
+OrthopedicSurgery.requires_theatre_type = [OrthoTheatreInst]
 OrthopedicSurgery.has_timeslot = [TS3]
-OrthopedicSurgery.has_assigned_staff = [OrthopedicSurgeon, Anesthetist2]  
-OrthopedicSurgeon.performs_operation = [OrthopedicSurgery] 
+OrthopedicSurgery.has_assigned_staff = [OrthopedicSurgeonInst, Anaesthetist2]  
+OrthopedicSurgeonInst.performs_operation = [OrthopedicSurgery] 
 
 GeneralSurgery = onto.Surgery("Appendectomy")
 GeneralSurgery.estimated_duration = [90]
 GeneralSurgery.is_emergency = [True] 
-GeneralSurgery.requires_theatre_type = [GeneralTheatre]
+GeneralSurgery.requires_theatre_type = [GeneralTheatreInst]
 GeneralSurgery.has_timeslot = [TS4]
-GeneralSurgery.has_assigned_staff = [GeneralSurgeon, Anesthetist4]  
-GeneralSurgeon.performs_operation = [GeneralSurgery] 
+GeneralSurgery.has_assigned_staff = [GeneralSurgeonInst, Anaesthetist4]  
+GeneralSurgeonInst.performs_operation = [GeneralSurgery] 
 
 # Phase 7: Wards
 NeuroWard = onto.Ward("Neurology_Ward")
@@ -213,42 +245,46 @@ RecoveryRoom3 = onto.RecoveryRoom("Recovery_Room_C")
 
 # Phase 9: Patients 
 Patient1 = onto.Patient("Patient_John_Doe")
-Patient1.is_assigned_to = [TS1]
+Patient1.scheduled_for = [BrainSurgery]
+Patient1.admitted_at_time = [TS1]
 Patient1.has_severity = [Sev1]
 Patient1.admitted_to = [NeuroWard]
 Patient1.assigned_to_recovery = [RecoveryRoom1]
 Patient1.undergoes_surgery = [BrainSurgery] 
 
 Patient2 = onto.Patient("Patient_Mary_Smith")
-Patient2.is_assigned_to = [TS2]
+Patient2.scheduled_for = [CardiacSurgery]
+Patient2.admitted_at_time = [TS2]
 Patient2.has_severity = [Sev2]
 Patient2.admitted_to = [CardioWard]
 Patient2.assigned_to_recovery = [RecoveryRoom2]
 Patient2.undergoes_surgery = [CardiacSurgery] 
 
 Patient3 = onto.Patient("Patient_Robert_Johnson")
-Patient3.is_assigned_to = [TS3]
+Patient3.scheduled_for = [OrthopedicSurgery]
+Patient3.admitted_at_time = [TS3]
 Patient3.has_severity = [Sev4]
 Patient3.admitted_to = [OrthoWard]
 Patient3.assigned_to_recovery = [RecoveryRoom3]
 Patient3.undergoes_surgery = [OrthopedicSurgery] 
 
 Patient4 = onto.Patient("Patient_Linda_Williams")
-Patient4.is_assigned_to = [TS4]
+Patient4.scheduled_for = [GeneralSurgery]
+Patient4.admitted_at_time = [TS4]
 Patient4.has_severity = [Sev1]
 Patient4.admitted_to = [GeneralWard]
 Patient4.assigned_to_recovery = [RecoveryRoom1]
 Patient4.undergoes_surgery = [GeneralSurgery]  
 
 Patient5 = onto.Patient("Patient_John_Williams")
-Patient5.is_assigned_to = [TS5]
+Patient5.admitted_at_time = [TS5]
 Patient5.has_severity = [Sev2]
 Patient5.admitted_to = [GeneralWard]
 Patient5.assigned_to_recovery = [RecoveryRoom1]
 # No surgery assigned (waiting list)
 
 Patient6 = onto.Patient("Patient_Sarah_Brown") 
-Patient6.is_assigned_to = [TS6]
+Patient6.admitted_at_time = [TS6]
 Patient6.has_severity = [Sev3]
 Patient6.admitted_to = [GeneralWard]
 Patient6.assigned_to_recovery = [RecoveryRoom1]
@@ -288,7 +324,7 @@ with onto:
     # Rule 5: Recovery schedule tracking
     rule5 = Imp()
     rule5.set_as_rule("""
-        Patient(?p), is_assigned_to(?p, ?t), assigned_to_recovery(?p, ?r)
+        Patient(?p), admitted_at_time(?p, ?t), assigned_to_recovery(?p, ?r)
         -> hasRecoverySchedule(?p)
     """)
 

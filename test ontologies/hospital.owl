@@ -23,11 +23,6 @@
   <rdfs:range rdf:resource="#SurgicalEquipment"/>
 </owl:ObjectProperty>
 
-<owl:ObjectProperty rdf:about="#is_assigned_to">
-  <rdfs:domain rdf:resource="#Patient"/>
-  <rdfs:range rdf:resource="#TimeSlot"/>
-</owl:ObjectProperty>
-
 <owl:ObjectProperty rdf:about="#has_timeslot">
   <rdfs:domain rdf:resource="#Surgery"/>
   <rdfs:range rdf:resource="#TimeSlot"/>
