@@ -30,3 +30,21 @@ ENV/
 *~
 .DS_Store
 chroma_db/
+
+# Backup and cleanup files
+backup/
+*.backup
+*.bak
+
+# Development and test files
+test ontologies/
+scripts/
+*.test.py
+
+# Ontology development files
+ontology/venv/
+ontology/main.py
+
+# Temporary and log files
+*.log
+*.tmp

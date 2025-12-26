@@ -75,7 +75,6 @@ def main():
         with col2:
             st.metric("Surgeries", summary['surgeries'])
             st.metric("Timeslots", summary['timeslots'])
-            st.metric("Total Entities", summary['total_entities'])
         
         st.markdown("---")
         
@@ -347,36 +346,12 @@ def main():
             st.subheader("Surgery Details")
             
             # Surgery Type Dropdown (instead of text input)
-            surgery_types = [
-                "Brain_Surgery",
-                "Cardiac_Bypass_Surgery",
-                "Hip_Replacement_Surgery",
-                "Knee_Arthroscopy",
-                "Appendectomy",
-                "Spinal_Surgery",
-                "Cataract_Surgery",
-                "Hernia_Repair",
-                "Gallbladder_Removal",
-                "Thyroid_Surgery",
-                "Custom (Type Below)"
-            ]
+            surgery_types = [s.name for s in onto_mgr.get_all_surgeries()]
             
             selected_surgery_type = st.selectbox(
                 "Surgery Type",
                 surgery_types,
-                help="Select a surgery type from the list or choose 'Custom' to enter your own"
             )
-            
-            # Show text input only if "Custom" is selected
-            if selected_surgery_type == "Custom (Type Below)":
-                surgery_name = st.text_input(
-                    "Custom Surgery Name",
-                    placeholder="e.g., Knee_Arthroscopy",
-                    help="Enter a custom surgery name using underscores instead of spaces"
-                )
-            else:
-                surgery_name = selected_surgery_type
-                st.info(f"Selected: **{surgery_name}**")
             
             # Get available surgeons
             surgeons = onto_mgr.get_all_surgeons()
@@ -471,8 +446,8 @@ def main():
         with col1:
             if st.button("✅ Add Surgery Schedule", type="primary"):
                 # Validation
-                if not surgery_name:
-                    st.error("Please select or enter a surgery name")
+                if not selected_surgery_type:
+                    st.error("Please select a surgery type")
                 elif not selected_surgeon:
                     st.error("Please select a surgeon")
                 elif not selected_theatre:
@@ -487,7 +462,7 @@ def main():
                         try:
                             # Add the surgery
                             success = onto_mgr.add_surgery(
-                                name=surgery_name,
+                                name=selected_surgery_type,
                                 surgeon_name=selected_surgeon,
                                 theatre_name=selected_theatre,
                                 timeslot_name=selected_timeslot,
@@ -506,9 +481,6 @@ def main():
                                     if severity_instance:
                                         patient.has_severity = [severity_instance]
                                     
-                                    # Find TimeSlot
-                                    
-                                    
                                     # Find ward
                                     ward_instance = onto_mgr.onto.search_one(iri=f"*{selected_ward}")
                                     if ward_instance:
@@ -520,7 +492,7 @@ def main():
                                         patient.assigned_to_recovery = [recovery_instance]
                                     
                                     # Link patient to surgery
-                                    surgery_instance = onto_mgr.onto.search_one(iri=f"*{surgery_name}")
+                                    surgery_instance = onto_mgr.onto.search_one(iri=f"*{selected_surgery_type}")
                                     if surgery_instance:
                                         patient.undergoes_surgery = [surgery_instance]
                                 
@@ -528,7 +500,7 @@ def main():
                                 onto_mgr.save()
                                 
                                 st.success(f"✅ Surgery schedule created successfully!")
-                                st.success(f"   • Surgery: **{surgery_name}**")
+                                st.success(f"   • Surgery: **{selected_surgery_type}**")
                                 st.success(f"   • Patient: **{patient_name}** (Severity: {selected_severity})")
                                 st.success(f"   • Surgeon: **{selected_surgeon}**")
                                 st.success(f"   • Theatre: **{selected_theatre}**")

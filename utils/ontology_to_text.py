@@ -71,11 +71,13 @@ class OntologyToText:
         emergency = surgery.is_emergency[0] if surgery.is_emergency else False
         
         timeslot = 'Not scheduled'
+        date = 'N/A'
         if surgery.has_timeslot:
             ts = surgery.has_timeslot[0]
             start = ts.start_time[0] if ts.start_time else 'N/A'
             end = ts.end_time[0] if ts.end_time else 'N/A'
-            timeslot = f"{start} to {end}"
+            date = ts.date[0] if ts.date else 'N/A'
+            timeslot = f"{start} to {end} on {date}"
         
         
         emergency_text = "This is an EMERGENCY surgery requiring immediate attention." if emergency else ""
@@ -83,6 +85,7 @@ class OntologyToText:
         text = f"""Surgery: {surgery.name}
         Surgeon: {surgeon}
         Theatre: {theatre}
+        Scheduled Date: {date}
         Scheduled Time: {timeslot}
         Duration: {duration} minutes
         Emergency Status: {'EMERGENCY' if emergency else 'Routine'}
@@ -128,6 +131,7 @@ class OntologyToText:
         start = timeslot.start_time[0] if timeslot.start_time else 'N/A'
         end = timeslot.end_time[0] if timeslot.end_time else 'N/A'
         duration = timeslot.duration[0] if timeslot.duration else 'N/A'
+        date = timeslot.date[0] if timeslot.date else 'N/A'
         
         # Find surgeries in this timeslot
         surgeries = []
@@ -139,6 +143,7 @@ class OntologyToText:
         surgeries_text = ", ".join(surgeries) if surgeries else "Available - no surgeries scheduled"
         
         text = f"""Timeslot: {timeslot.name}
+        Date: {date}
         Start Time: {start}
         End Time: {end}
         Duration: {duration} minutes
