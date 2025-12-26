@@ -71,11 +71,13 @@ class OntologyToText:
         emergency = surgery.is_emergency[0] if surgery.is_emergency else False
         
         timeslot = 'Not scheduled'
+        date = 'N/A'
         if surgery.has_timeslot:
             ts = surgery.has_timeslot[0]
             start = ts.start_time[0] if ts.start_time else 'N/A'
             end = ts.end_time[0] if ts.end_time else 'N/A'
-            timeslot = f"{start} to {end}"
+            date = ts.date[0] if ts.date else 'N/A'
+            timeslot = f"{start} to {end} on {date}"
         
         
         emergency_text = "This is an EMERGENCY surgery requiring immediate attention." if emergency else ""
@@ -83,6 +85,7 @@ class OntologyToText:
         text = f"""Surgery: {surgery.name}
         Surgeon: {surgeon}
         Theatre: {theatre}
+        Scheduled Date: {date}
         Scheduled Time: {timeslot}
         Duration: {duration} minutes
         Emergency Status: {'EMERGENCY' if emergency else 'Routine'}
@@ -92,20 +95,33 @@ class OntologyToText:
     
     def patient_to_text(self, patient) -> str:
         """Convert patient entity to natural language"""
-        timeslot = 'Not assigned'
-        if patient.is_assigned_to:
-            ts = patient.is_assigned_to[0]
+        # Get surgery information
+        surgery_info = 'No surgery scheduled'
+        if patient.undergoes_surgery:
+            surgery = patient.undergoes_surgery[0]
+            if surgery.has_timeslot:
+                ts = surgery.has_timeslot[0]
+                start = ts.start_time[0] if ts.start_time else 'N/A'
+                end = ts.end_time[0] if ts.end_time else 'N/A'
+                surgery_info = f"{surgery.name} scheduled from {start} to {end}"
+        
+        # Get admission time
+        admission_time = 'Not assigned'
+        if patient.admitted_at_time:
+            ts = patient.admitted_at_time[0]
             start = ts.start_time[0] if ts.start_time else 'N/A'
-            end = ts.end_time[0] if ts.end_time else 'N/A'
-            timeslot = f"{start} to {end}"
+            admission_time = f"{start}"
         
         ward = patient.admitted_to[0].name if patient.admitted_to else 'N/A'
         recovery = patient.assigned_to_recovery[0].name if patient.assigned_to_recovery else 'N/A'
+        severity = patient.has_severity[0].severity_level[0] if patient.has_severity and patient.has_severity[0].severity_level else 'N/A'
         
         text = f"""Patient: {patient.name}
-        Surgery Timeslot: {timeslot}
+        Surgery: {surgery_info}
+        Admission Time: {admission_time}
         Admitted to Ward: {ward}
         Recovery Room: {recovery}
+        Severity: {severity}
         This patient has a scheduled surgery and post-operative recovery plan."""
         
         return text.strip()
@@ -115,6 +131,7 @@ class OntologyToText:
         start = timeslot.start_time[0] if timeslot.start_time else 'N/A'
         end = timeslot.end_time[0] if timeslot.end_time else 'N/A'
         duration = timeslot.duration[0] if timeslot.duration else 'N/A'
+        date = timeslot.date[0] if timeslot.date else 'N/A'
         
         # Find surgeries in this timeslot
         surgeries = []
@@ -126,6 +143,7 @@ class OntologyToText:
         surgeries_text = ", ".join(surgeries) if surgeries else "Available - no surgeries scheduled"
         
         text = f"""Timeslot: {timeslot.name}
+        Date: {date}
         Start Time: {start}
         End Time: {end}
         Duration: {duration} minutes

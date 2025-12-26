@@ -18,127 +18,8 @@ class OntologyManager:
             self.onto = get_ontology(owl_file).load()
             print(f"✅ Loaded existing ontology from {owl_file}")
         else:
-            self.onto = self._create_new_ontology()
-            print(f"✅ Created new ontology")
+            raise FileNotFoundError(f"Ontology file {owl_file} not found")
     
-    def _create_new_ontology(self):
-        """Create a new ontology with schema"""
-        onto = get_ontology("http://test.org/hospital.owl")
-        
-        with onto:
-            # Base Classes
-            class Person(Thing): pass
-            class Location(Thing): pass
-            class ClinicalProcess(Thing): pass
-            class Resource(Thing): pass
-            class Severity(Thing): pass  # Added Severity class
-            
-            # Conflict Classes
-            class SchedulingConflict(Thing): pass
-            class TheatreConflict(SchedulingConflict): pass
-            class SpecializationMismatch(SchedulingConflict): pass
-            class hasRecoverySchedule(Thing): pass
-            
-            # Person Subclasses
-            class Staff(Person): pass
-            class Surgeon(Staff): pass
-            class Anesthetist(Staff): pass
-            class Patient(Person): pass
-            
-            # Location Subclasses
-            class Theatre(Location): pass
-            class Ward(Location): pass
-            class RecoveryRoom(Location): pass
-            
-            # Clinical Process Subclasses
-            class MedicalProcedure(ClinicalProcess): pass
-            class Surgery(MedicalProcedure): pass
-            class TimeSlot(ClinicalProcess): pass
-            
-            # Object Properties
-            class performs_operation(ObjectProperty):
-                domain = [Surgeon]
-                range = [Surgery]
-
-            class undergoes_surgery(ObjectProperty): # Added property
-                domain = [Patient]
-                range = [Surgery]
-            
-            class requires_theatre_type(ObjectProperty):
-                domain = [Surgery]
-                range = [Theatre]
-            
-            class is_assigned_to(ObjectProperty):
-                domain = [Patient]
-                range = [TimeSlot]
-            
-            class has_timeslot(ObjectProperty):
-                domain = [Surgery]
-                range = [TimeSlot]
-            
-            class has_temporal_overlap(ObjectProperty):
-                domain = [TimeSlot]
-                range = [TimeSlot]
-                symmetric = True
-            
-            class has_assigned_staff(ObjectProperty):
-                domain = [Surgery]
-                range = [Staff]
-            
-            class admitted_to(ObjectProperty):
-                domain = [Patient]
-                range = [Ward]
-            
-            class assigned_to_recovery(ObjectProperty):
-                domain = [Patient]
-                range = [RecoveryRoom]
-            
-            class works_in_theatre(ObjectProperty):
-                domain = [Staff]
-                range = [Theatre]
-
-            class has_severity(ObjectProperty): # Added property
-                domain = [Patient]
-                range = [Severity]
-            
-            # Data Properties
-            class has_license_number(DataProperty):
-                domain = [Surgeon]
-                range = [str]
-            
-            class estimated_duration(DataProperty):
-                domain = [Surgery]
-                range = [int]
-            
-            class is_emergency(DataProperty):
-                domain = [Surgery]
-                range = [bool]
-            
-            class start_time(DataProperty):
-                domain = [TimeSlot]
-                range = [str]
-            
-            class end_time(DataProperty):
-                domain = [TimeSlot]
-                range = [str]
-            
-            class duration(DataProperty):
-                domain = [TimeSlot]
-                range = [int]
-        
-        # Initialize default data
-        self._initialize_data(onto)
-        
-        onto.save(file=self.owl_file, format="rdfxml")
-        return onto
-
-    def _initialize_data(self, onto):
-        """Initialize reference data (Severity, etc.)"""
-        with onto:
-            # Create Severity Levels
-            for level in ["Severe", "Moderate", "Mild", "Minor"]:
-                if not onto.search_one(iri=f"*{level}"):
-                    onto.Severity(level)
     
     # ========== QUERY METHODS ==========
     
@@ -253,7 +134,7 @@ class OntologyManager:
             print(f"Error adding surgery: {e}")
             return False
     
-    def add_timeslot(self, name: str, start: str, end: str, duration: int) -> bool:
+    def add_timeslot(self, name: str, start: str, end: str, duration: int, date: str = None) -> bool:
         """Add a new timeslot to the ontology"""
         try:
             with self.onto:
@@ -261,12 +142,57 @@ class OntologyManager:
                 timeslot.start_time = [start]
                 timeslot.end_time = [end]
                 timeslot.duration = [duration]
+                if date:
+                    timeslot.date = [date]
             
             self.save()
             return True
         except Exception as e:
             print(f"Error adding timeslot: {e}")
             return False
+    
+    def get_timeslots_by_date(self, date: str) -> List:
+        """Get all timeslots for a specific date (format: YYYY-MM-DD)"""
+        try:
+            all_timeslots = self.get_all_timeslots()
+            return [ts for ts in all_timeslots if ts.date and ts.date[0] == date]
+        except Exception as e:
+            print(f"Error getting timeslots by date: {e}")
+            return []
+    
+    def get_surgeries_by_date(self, date: str) -> List[Dict]:
+        """Get all surgeries scheduled for a specific date"""
+        try:
+            timeslots = self.get_timeslots_by_date(date)
+            surgeries = []
+            
+            for ts in timeslots:
+                # Find surgeries in this timeslot
+                for surgery in self.onto.Surgery.instances():
+                    if surgery.has_timeslot and surgery.has_timeslot[0] == ts:
+                        surgeries.append({
+                            'surgery': surgery.name,
+                            'surgeon': surgery.performs_operation[0].name if surgery.performs_operation else 'N/A',
+                            'theatre': surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A',
+                            'start_time': ts.start_time[0] if ts.start_time else 'N/A',
+                            'end_time': ts.end_time[0] if ts.end_time else 'N/A',
+                            'date': date,
+                            'is_emergency': surgery.is_emergency[0] if surgery.is_emergency else False
+                        })
+            
+            return surgeries
+        except Exception as e:
+            print(f"Error getting surgeries by date: {e}")
+            return []
+    
+    def get_theatre_schedule_by_date(self, theatre_name: str, date: str) -> List[Dict]:
+        """Get surgeries scheduled in a specific theatre on a specific date"""
+        try:
+            all_surgeries = self.get_surgeries_by_date(date)
+            return [s for s in all_surgeries if s['theatre'] == theatre_name]
+        except Exception as e:
+            print(f"Error getting theatre schedule by date: {e}")
+            return []
     
     # ========== DELETE METHODS ==========
     
@@ -454,6 +380,50 @@ class OntologyManager:
             print(f"❌ Error getting schedule info: {e}")
             return None
     
+    def get_patient_info(self, patient_name: str) -> Optional[Dict]:
+        """Get detailed information about a specific patient"""
+        try:
+            patient = self.onto.search_one(iri=f"*{patient_name}")
+            if not patient:
+                return None
+            
+            # Get surgery information
+            surgery_info = 'No surgery scheduled'
+            surgery_name = 'N/A'
+            surgeon_name = 'N/A'
+            timeslot_info = 'N/A'
+            
+            if patient.undergoes_surgery:
+                surgery = patient.undergoes_surgery[0]
+                surgery_name = surgery.name
+                
+                if surgery.performs_operation:
+                    surgeon_name = surgery.performs_operation[0].name
+                
+                if surgery.has_timeslot:
+                    ts = surgery.has_timeslot[0]
+                    start = ts.start_time[0] if ts.start_time else 'N/A'
+                    end = ts.end_time[0] if ts.end_time else 'N/A'
+                    timeslot_info = f"{start} to {end}"
+                    surgery_info = f"{surgery_name} scheduled from {start} to {end}"
+            
+            info = {
+                'patient_name': patient.name,
+                'surgery': surgery_name,
+                'surgery_details': surgery_info,
+                'surgeon': surgeon_name,
+                'timeslot': timeslot_info,
+                'ward': patient.admitted_to[0].name if patient.admitted_to else 'N/A',
+                'recovery_room': patient.assigned_to_recovery[0].name if patient.assigned_to_recovery else 'N/A',
+                'severity': patient.has_severity[0].severity_level[0] if patient.has_severity and patient.has_severity[0].severity_level else 'N/A',
+                'admission_time': patient.admitted_at_time[0].start_time[0] if patient.admitted_at_time and patient.admitted_at_time[0].start_time else 'N/A'
+            }
+            
+            return info
+            
+        except Exception as e:
+            print(f"❌ Error getting patient info: {e}")
+            return None
     
     # ========== UTILITY METHODS ==========
     
