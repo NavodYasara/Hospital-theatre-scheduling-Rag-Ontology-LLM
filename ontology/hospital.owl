@@ -1,625 +1,836 @@
-<?xml version='1.0' encoding='utf-8'?>
-<rdf:RDF xmlns="http://test.org/hospital.owl#" xmlns:ns4="http://www.w3.org/2003/11/swrl#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xml:base="http://test.org/hospital.owl">
+<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xml:base="http://test.org/hospital.owl"
+         xmlns="http://test.org/hospital.owl#"
+         xmlns:swrl="http://www.w3.org/2003/11/swrl#">
 
-<owl:Ontology rdf:about="http://test.org/hospital.owl" />
+<owl:Ontology rdf:about="http://test.org/hospital.owl"/>
 
 <owl:ObjectProperty rdf:about="#performs_operation">
-  <rdfs:domain rdf:resource="#Surgeon" />
-  <rdfs:range rdf:resource="#Surgery" />
+  <rdfs:domain rdf:resource="#Surgeon"/>
+  <rdfs:range rdf:resource="#Surgery"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#has_timeslot">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="#TimeSlot" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="#TimeSlot"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#occurs_in">
-  <rdfs:domain rdf:resource="#ClinicalProcess" />
-  <rdfs:range rdf:resource="#Location" />
+  <rdfs:domain rdf:resource="#ClinicalProcess"/>
+  <rdfs:range rdf:resource="#Location"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#has_severity">
-  <rdfs:domain rdf:resource="#Patient" />
-  <rdfs:range rdf:resource="#Severity" />
+  <rdfs:domain rdf:resource="#Patient"/>
+  <rdfs:range rdf:resource="#Severity"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#has_temporal_overlap">
-  <rdfs:domain rdf:resource="#TimeSlot" />
-  <rdfs:range rdf:resource="#TimeSlot" />
+  <rdfs:domain rdf:resource="#TimeSlot"/>
+  <rdfs:range rdf:resource="#TimeSlot"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#available_during">
-  <rdfs:domain rdf:resource="#Staff" />
-  <rdfs:range rdf:resource="#TimeSlot" />
+  <rdfs:domain rdf:resource="#Staff"/>
+  <rdfs:range rdf:resource="#TimeSlot"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#assigned_to_surgery">
-  <rdfs:domain rdf:resource="#Staff" />
-  <rdfs:range rdf:resource="#Surgery" />
+  <rdfs:domain rdf:resource="#Staff"/>
+  <rdfs:range rdf:resource="#Surgery"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#on_duty_in">
-  <rdfs:domain rdf:resource="#Staff" />
-  <rdfs:range rdf:resource="#Ward" />
+  <rdfs:domain rdf:resource="#Staff"/>
+  <rdfs:range rdf:resource="#Ward"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#scheduled_for">
-  <rdfs:domain rdf:resource="#Patient" />
-  <rdfs:range rdf:resource="#Surgery" />
+  <rdfs:domain rdf:resource="#Patient"/>
+  <rdfs:range rdf:resource="#Surgery"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#admitted_at_time">
-  <rdfs:domain rdf:resource="#Patient" />
-  <rdfs:range rdf:resource="#TimeSlot" />
+  <rdfs:domain rdf:resource="#Patient"/>
+  <rdfs:range rdf:resource="#TimeSlot"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#discharged_from">
-  <rdfs:domain rdf:resource="#Patient" />
-  <rdfs:range rdf:resource="#Ward" />
+  <rdfs:domain rdf:resource="#Patient"/>
+  <rdfs:range rdf:resource="#Ward"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#requires_postop_care_in">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="#Location" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="#Location"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#assigned_to_recovery">
-  <rdfs:domain rdf:resource="#Patient" />
-  <rdfs:range rdf:resource="#RecoveryRoom" />
+  <rdfs:domain rdf:resource="#Patient"/>
+  <rdfs:range rdf:resource="#RecoveryRoom"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#works_in_theatre">
-  <rdfs:domain rdf:resource="#Staff" />
-  <rdfs:range rdf:resource="#Theatre" />
+  <rdfs:domain rdf:resource="#Staff"/>
+  <rdfs:range rdf:resource="#Theatre"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#admitted_to">
-  <rdfs:domain rdf:resource="#Patient" />
-  <rdfs:range rdf:resource="#Ward" />
+  <rdfs:domain rdf:resource="#Patient"/>
+  <rdfs:range rdf:resource="#Ward"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#has_assigned_staff">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="#Staff" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="#Staff"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#requires_theatre_type">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="#Theatre" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="#Theatre"/>
 </owl:ObjectProperty>
 
 <owl:ObjectProperty rdf:about="#undergoes_surgery">
-  <rdfs:domain rdf:resource="#Patient" />
-  <rdfs:range rdf:resource="#Surgery" />
+  <rdfs:domain rdf:resource="#Patient"/>
+  <rdfs:range rdf:resource="#Surgery"/>
 </owl:ObjectProperty>
 
 <owl:DatatypeProperty rdf:about="#has_license_number">
-  <rdfs:domain rdf:resource="#Surgeon" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+  <rdfs:domain rdf:resource="#Surgeon"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#severity_level">
-  <rdfs:domain rdf:resource="#Severity" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <rdfs:domain rdf:resource="#Severity"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#estimated_duration">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#duration">
-  <rdfs:domain rdf:resource="#TimeSlot" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+  <rdfs:domain rdf:resource="#TimeSlot"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#availability_status">
-  <rdfs:domain rdf:resource="#Staff" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean" />
+  <rdfs:domain rdf:resource="#Staff"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#is_emergency">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#surgery_status">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#start_time">
-  <rdfs:domain rdf:resource="#TimeSlot" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <rdfs:domain rdf:resource="#TimeSlot"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#end_time">
-  <rdfs:domain rdf:resource="#TimeSlot" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <rdfs:domain rdf:resource="#TimeSlot"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#date">
-  <rdfs:domain rdf:resource="#TimeSlot" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <rdfs:domain rdf:resource="#TimeSlot"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#actual_start_time">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
 </owl:DatatypeProperty>
 
 <owl:DatatypeProperty rdf:about="#actual_end_time">
-  <rdfs:domain rdf:resource="#Surgery" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
-</owl:DatatypeProperty>
-
-<owl:DatatypeProperty rdf:about="#date">
-  <rdfs:domain rdf:resource="#TimeSlot" />
-  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+  <rdfs:domain rdf:resource="#Surgery"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
 </owl:DatatypeProperty>
 
 <owl:Class rdf:about="#Surgeon">
-  <rdfs:subClassOf rdf:resource="#Staff" />
+  <rdfs:subClassOf rdf:resource="#Staff"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Surgery">
-  <rdfs:subClassOf rdf:resource="#MedicalProcedure" />
+  <rdfs:subClassOf rdf:resource="#MedicalProcedure"/>
 </owl:Class>
 
 <owl:Class rdf:about="#TimeSlot">
-  <rdfs:subClassOf rdf:resource="#TimeEntity" />
+  <rdfs:subClassOf rdf:resource="#TimeEntity"/>
 </owl:Class>
 
 <owl:Class rdf:about="#ClinicalProcess">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Location">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Patient">
-  <rdfs:subClassOf rdf:resource="#Person" />
+  <rdfs:subClassOf rdf:resource="#Person"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Severity">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Staff">
-  <rdfs:subClassOf rdf:resource="#Person" />
+  <rdfs:subClassOf rdf:resource="#Person"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Ward">
-  <rdfs:subClassOf rdf:resource="#Location" />
+  <rdfs:subClassOf rdf:resource="#Location"/>
 </owl:Class>
 
 <owl:Class rdf:about="#RecoveryRoom">
-  <rdfs:subClassOf rdf:resource="#Location" />
+  <rdfs:subClassOf rdf:resource="#Location"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Theatre">
-  <rdfs:subClassOf rdf:resource="#Location" />
+  <rdfs:subClassOf rdf:resource="#Location"/>
 </owl:Class>
 
 <owl:Class rdf:about="#MedicalProcedure">
-  <rdfs:subClassOf rdf:resource="#ClinicalProcess" />
+  <rdfs:subClassOf rdf:resource="#ClinicalProcess"/>
 </owl:Class>
 
 <owl:Class rdf:about="#TimeEntity">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Person">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#SchedulingConflict">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#hasRecoverySchedule">
-  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing" />
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
 </owl:Class>
 
 <owl:Class rdf:about="#TheatreConflict">
-  <rdfs:subClassOf rdf:resource="#SchedulingConflict" />
+  <rdfs:subClassOf rdf:resource="#SchedulingConflict"/>
 </owl:Class>
 
 <owl:Class rdf:about="#SpecializationMismatch">
-  <rdfs:subClassOf rdf:resource="#SchedulingConflict" />
+  <rdfs:subClassOf rdf:resource="#SchedulingConflict"/>
 </owl:Class>
 
 <owl:Class rdf:about="#NeuroSurgeon">
-  <rdfs:subClassOf rdf:resource="#Surgeon" />
+  <rdfs:subClassOf rdf:resource="#Surgeon"/>
 </owl:Class>
 
 <owl:Class rdf:about="#OrthopedicSurgeon">
-  <rdfs:subClassOf rdf:resource="#Surgeon" />
+  <rdfs:subClassOf rdf:resource="#Surgeon"/>
 </owl:Class>
 
 <owl:Class rdf:about="#GeneralSurgeon">
-  <rdfs:subClassOf rdf:resource="#Surgeon" />
+  <rdfs:subClassOf rdf:resource="#Surgeon"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Anaesthetist">
-  <rdfs:subClassOf rdf:resource="#Staff" />
+  <rdfs:subClassOf rdf:resource="#Staff"/>
 </owl:Class>
 
 <owl:Class rdf:about="#Nurse">
-  <rdfs:subClassOf rdf:resource="#Staff" />
+  <rdfs:subClassOf rdf:resource="#Staff"/>
 </owl:Class>
 
 <owl:Class rdf:about="#NeuroTheatre">
-  <rdfs:subClassOf rdf:resource="#Theatre" />
+  <rdfs:subClassOf rdf:resource="#Theatre"/>
 </owl:Class>
 
 <owl:Class rdf:about="#OrthoTheatre">
-  <rdfs:subClassOf rdf:resource="#Theatre" />
+  <rdfs:subClassOf rdf:resource="#Theatre"/>
 </owl:Class>
 
 <owl:Class rdf:about="#CardioTheatre">
-  <rdfs:subClassOf rdf:resource="#Theatre" />
+  <rdfs:subClassOf rdf:resource="#Theatre"/>
 </owl:Class>
 
 <owl:Class rdf:about="#GeneralTheatre">
-  <rdfs:subClassOf rdf:resource="#Theatre" />
+  <rdfs:subClassOf rdf:resource="#Theatre"/>
 </owl:Class>
 
 <owl:NamedIndividual rdf:about="#TimeSlot_08_00">
-  <rdf:type rdf:resource="#TimeSlot" />
-  <has_temporal_overlap rdf:resource="#TimeSlot_10_45" />
+  <rdf:type rdf:resource="#TimeSlot"/>
+  <has_temporal_overlap rdf:resource="#TimeSlot_10_45"/>
   <start_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">08:00</start_time>
   <end_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">10:30</end_time>
   <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</duration>
-  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-26</date></owl:NamedIndividual>
+  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-26</date>
+</owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#TimeSlot_10_45">
-  <rdf:type rdf:resource="#TimeSlot" />
-  <has_temporal_overlap rdf:resource="#TimeSlot_08_00" />
+  <rdf:type rdf:resource="#TimeSlot"/>
+  <has_temporal_overlap rdf:resource="#TimeSlot_08_00"/>
   <start_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">10:45</start_time>
   <end_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">13:15</end_time>
   <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</duration>
-  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-27</date></owl:NamedIndividual>
+  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-27</date>
+</owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#TimeSlot_14_00">
-  <rdf:type rdf:resource="#TimeSlot" />
-  <has_temporal_overlap rdf:resource="#TimeSlot_16_45" />
+  <rdf:type rdf:resource="#TimeSlot"/>
+  <has_temporal_overlap rdf:resource="#TimeSlot_16_45"/>
   <start_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">14:00</start_time>
   <end_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">16:30</end_time>
   <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</duration>
-  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-28</date></owl:NamedIndividual>
+  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-28</date>
+</owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#TimeSlot_16_45">
-  <rdf:type rdf:resource="#TimeSlot" />
-  <has_temporal_overlap rdf:resource="#TimeSlot_14_00" />
+  <rdf:type rdf:resource="#TimeSlot"/>
+  <has_temporal_overlap rdf:resource="#TimeSlot_14_00"/>
   <start_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">16:45</start_time>
   <end_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">19:15</end_time>
   <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</duration>
-  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-26</date></owl:NamedIndividual>
+  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-26</date>
+</owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#TimeSlot_19_30">
-  <rdf:type rdf:resource="#TimeSlot" />
-  <has_temporal_overlap rdf:resource="#TimeSlot_22_45" />
+  <rdf:type rdf:resource="#TimeSlot"/>
+  <has_temporal_overlap rdf:resource="#TimeSlot_22_45"/>
   <start_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">19:30</start_time>
   <end_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">22:00</end_time>
   <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</duration>
-  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-27</date></owl:NamedIndividual>
+  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-27</date>
+</owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#TimeSlot_22_45">
-  <rdf:type rdf:resource="#TimeSlot" />
-  <has_temporal_overlap rdf:resource="#TimeSlot_19_30" />
+  <rdf:type rdf:resource="#TimeSlot"/>
+  <has_temporal_overlap rdf:resource="#TimeSlot_19_30"/>
   <start_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">22:45</start_time>
   <end_time rdf:datatype="http://www.w3.org/2001/XMLSchema#string">01:15</end_time>
   <duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">150</duration>
-  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-28</date></owl:NamedIndividual>
+  <date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2025-12-28</date>
+</owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Severe">
-  <rdf:type rdf:resource="#Severity" />
+  <rdf:type rdf:resource="#Severity"/>
   <severity_level rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Severe</severity_level>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Moderate">
-  <rdf:type rdf:resource="#Severity" />
+  <rdf:type rdf:resource="#Severity"/>
   <severity_level rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Moderate</severity_level>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Mild">
-  <rdf:type rdf:resource="#Severity" />
+  <rdf:type rdf:resource="#Severity"/>
   <severity_level rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Mild</severity_level>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Minor">
-  <rdf:type rdf:resource="#Severity" />
+  <rdf:type rdf:resource="#Severity"/>
   <severity_level rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Minor</severity_level>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Neuro_Theatre">
-  <rdf:type rdf:resource="#NeuroTheatre" />
+  <rdf:type rdf:resource="#NeuroTheatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Ortho_Theatre">
-  <rdf:type rdf:resource="#OrthoTheatre" />
+  <rdf:type rdf:resource="#OrthoTheatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Cardio_Theatre">
-  <rdf:type rdf:resource="#CardioTheatre" />
+  <rdf:type rdf:resource="#CardioTheatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#General_Theatre">
-  <rdf:type rdf:resource="#GeneralTheatre" />
+  <rdf:type rdf:resource="#GeneralTheatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Dr_Smith">
-  <rdf:type rdf:resource="#NeuroSurgeon" />
-  <works_in_theatre rdf:resource="#Neuro_Theatre" />
-  <performs_operation rdf:resource="#Brain_Surgery" />
+  <rdf:type rdf:resource="#NeuroSurgeon"/>
+  <works_in_theatre rdf:resource="#Neuro_Theatre"/>
+  <performs_operation rdf:resource="#Brain_Surgery"/>
   <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">12345</has_license_number>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Brain_Surgery">
-  <rdf:type rdf:resource="#Surgery" />
-  <requires_theatre_type rdf:resource="#Neuro_Theatre" />
-  <has_timeslot rdf:resource="#TimeSlot_08_00" />
-  <has_assigned_staff rdf:resource="#Anaesthetist_Michael" />
-  <has_assigned_staff rdf:resource="#Dr_Smith" />
-  <performs_operation rdf:resource="#Dr_Smith" />
+  <rdf:type rdf:resource="#Surgery"/>
+  <requires_theatre_type rdf:resource="#Neuro_Theatre"/>
+  <has_timeslot rdf:resource="#TimeSlot_08_00"/>
+  <has_assigned_staff rdf:resource="#Anaesthetist_Michael"/>
+  <has_assigned_staff rdf:resource="#Dr_Smith"/>
+  <performs_operation rdf:resource="#Dr_Smith"/>
   <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">240</estimated_duration>
   <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</is_emergency>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Anaesthetist_Michael">
-  <rdf:type rdf:resource="#Anaesthetist" />
-  <works_in_theatre rdf:resource="#Neuro_Theatre" />
+  <rdf:type rdf:resource="#Anaesthetist"/>
+  <works_in_theatre rdf:resource="#Neuro_Theatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Dr_Johnson">
-  <rdf:type rdf:resource="#OrthopedicSurgeon" />
-  <works_in_theatre rdf:resource="#Ortho_Theatre" />
-  <performs_operation rdf:resource="#Hip_Replacement_Surgery" />
+  <rdf:type rdf:resource="#OrthopedicSurgeon"/>
+  <works_in_theatre rdf:resource="#Ortho_Theatre"/>
+  <performs_operation rdf:resource="#Hip_Replacement_Surgery"/>
   <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">67890</has_license_number>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Hip_Replacement_Surgery">
-  <rdf:type rdf:resource="#Surgery" />
-  <requires_theatre_type rdf:resource="#Ortho_Theatre" />
-  <has_timeslot rdf:resource="#TimeSlot_14_00" />
-  <has_assigned_staff rdf:resource="#Dr_Johnson" />
-  <has_assigned_staff rdf:resource="#Anaesthetist_David" />
+  <rdf:type rdf:resource="#Surgery"/>
+  <requires_theatre_type rdf:resource="#Ortho_Theatre"/>
+  <has_timeslot rdf:resource="#TimeSlot_14_00"/>
+  <has_assigned_staff rdf:resource="#Dr_Johnson"/>
+  <has_assigned_staff rdf:resource="#Anaesthetist_David"/>
   <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">120</estimated_duration>
   <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</is_emergency>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Anaesthetist_David">
-  <rdf:type rdf:resource="#Anaesthetist" />
-  <works_in_theatre rdf:resource="#Ortho_Theatre" />
+  <rdf:type rdf:resource="#Anaesthetist"/>
+  <works_in_theatre rdf:resource="#Ortho_Theatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Dr_Williams">
-  <rdf:type rdf:resource="#GeneralSurgeon" />
-  <works_in_theatre rdf:resource="#Cardio_Theatre" />
-  <performs_operation rdf:resource="#Cardiac_Bypass_Surgery" />
+  <rdf:type rdf:resource="#GeneralSurgeon"/>
+  <works_in_theatre rdf:resource="#Cardio_Theatre"/>
+  <performs_operation rdf:resource="#Cardiac_Bypass_Surgery"/>
   <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">78901</has_license_number>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Cardiac_Bypass_Surgery">
-  <rdf:type rdf:resource="#Surgery" />
-  <requires_theatre_type rdf:resource="#Cardio_Theatre" />
-  <has_timeslot rdf:resource="#TimeSlot_10_45" />
-  <has_assigned_staff rdf:resource="#Dr_Williams" />
-  <has_assigned_staff rdf:resource="#Anaesthetist_Elijah" />
-  <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">240</estimated_duration>
-  <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</is_emergency>
+  <rdf:type rdf:resource="#Surgery"/>
+  <has_assigned_staff rdf:resource="#Dr_Williams"/>
+  <has_assigned_staff rdf:resource="#Anaesthetist_Elijah"/>
+  <performs_operation rdf:resource="#Dr_Smith"/>
+  <requires_theatre_type rdf:resource="#Neuro_Theatre"/>
+  <has_timeslot rdf:resource="#TimeSlot_08_00"/>
+  <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">180</estimated_duration>
+  <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</is_emergency>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Anaesthetist_Elijah">
-  <rdf:type rdf:resource="#Anaesthetist" />
-  <works_in_theatre rdf:resource="#Cardio_Theatre" />
+  <rdf:type rdf:resource="#Anaesthetist"/>
+  <works_in_theatre rdf:resource="#Cardio_Theatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Dr_Brown">
-  <rdf:type rdf:resource="#GeneralSurgeon" />
-  <works_in_theatre rdf:resource="#General_Theatre" />
-  <performs_operation rdf:resource="#Appendectomy" />
+  <rdf:type rdf:resource="#GeneralSurgeon"/>
+  <works_in_theatre rdf:resource="#General_Theatre"/>
+  <performs_operation rdf:resource="#Appendectomy"/>
   <has_license_number rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">34567</has_license_number>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Appendectomy">
-  <rdf:type rdf:resource="#Surgery" />
-  <requires_theatre_type rdf:resource="#General_Theatre" />
-  <has_timeslot rdf:resource="#TimeSlot_16_45" />
-  <has_assigned_staff rdf:resource="#Dr_Brown" />
-  <has_assigned_staff rdf:resource="#Anaesthetist_Frank" />
+  <rdf:type rdf:resource="#Surgery"/>
+  <requires_theatre_type rdf:resource="#General_Theatre"/>
+  <has_timeslot rdf:resource="#TimeSlot_16_45"/>
+  <has_assigned_staff rdf:resource="#Dr_Brown"/>
+  <has_assigned_staff rdf:resource="#Anaesthetist_Frank"/>
   <estimated_duration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">90</estimated_duration>
   <is_emergency rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</is_emergency>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Anaesthetist_Frank">
-  <rdf:type rdf:resource="#Anaesthetist" />
-  <works_in_theatre rdf:resource="#General_Theatre" />
+  <rdf:type rdf:resource="#Anaesthetist"/>
+  <works_in_theatre rdf:resource="#General_Theatre"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Neurology_Ward">
-  <rdf:type rdf:resource="#Ward" />
+  <rdf:type rdf:resource="#Ward"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Cardiology_Ward">
-  <rdf:type rdf:resource="#Ward" />
+  <rdf:type rdf:resource="#Ward"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Orthopedic_Ward">
-  <rdf:type rdf:resource="#Ward" />
+  <rdf:type rdf:resource="#Ward"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#General_Ward">
-  <rdf:type rdf:resource="#Ward" />
+  <rdf:type rdf:resource="#Ward"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Recovery_Room_A">
-  <rdf:type rdf:resource="#RecoveryRoom" />
+  <rdf:type rdf:resource="#RecoveryRoom"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Recovery_Room_B">
-  <rdf:type rdf:resource="#RecoveryRoom" />
+  <rdf:type rdf:resource="#RecoveryRoom"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Recovery_Room_C">
-  <rdf:type rdf:resource="#RecoveryRoom" />
+  <rdf:type rdf:resource="#RecoveryRoom"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Patient_John_Doe">
-  <rdf:type rdf:resource="#Patient" />
-  <scheduled_for rdf:resource="#Brain_Surgery" />
-  <admitted_at_time rdf:resource="#TimeSlot_08_00" />
-  <has_severity rdf:resource="#Severe" />
-  <admitted_to rdf:resource="#Neurology_Ward" />
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A" />
-  <undergoes_surgery rdf:resource="#Brain_Surgery" />
+  <rdf:type rdf:resource="#Patient"/>
+  <scheduled_for rdf:resource="#Brain_Surgery"/>
+  <admitted_at_time rdf:resource="#TimeSlot_08_00"/>
+  <has_severity rdf:resource="#Severe"/>
+  <admitted_to rdf:resource="#Neurology_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
+  <undergoes_surgery rdf:resource="#Brain_Surgery"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Patient_Mary_Smith">
-  <rdf:type rdf:resource="#Patient" />
-  <scheduled_for rdf:resource="#Cardiac_Bypass_Surgery" />
-  <admitted_at_time rdf:resource="#TimeSlot_10_45" />
-  <has_severity rdf:resource="#Moderate" />
-  <admitted_to rdf:resource="#Cardiology_Ward" />
-  <assigned_to_recovery rdf:resource="#Recovery_Room_B" />
-  <undergoes_surgery rdf:resource="#Cardiac_Bypass_Surgery" />
+  <rdf:type rdf:resource="#Patient"/>
+  <scheduled_for rdf:resource="#Cardiac_Bypass_Surgery"/>
+  <admitted_at_time rdf:resource="#TimeSlot_10_45"/>
+  <has_severity rdf:resource="#Moderate"/>
+  <admitted_to rdf:resource="#Cardiology_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_B"/>
+  <undergoes_surgery rdf:resource="#Cardiac_Bypass_Surgery"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Patient_Robert_Johnson">
-  <rdf:type rdf:resource="#Patient" />
-  <scheduled_for rdf:resource="#Hip_Replacement_Surgery" />
-  <admitted_at_time rdf:resource="#TimeSlot_14_00" />
-  <has_severity rdf:resource="#Minor" />
-  <admitted_to rdf:resource="#Orthopedic_Ward" />
-  <assigned_to_recovery rdf:resource="#Recovery_Room_C" />
-  <undergoes_surgery rdf:resource="#Hip_Replacement_Surgery" />
+  <rdf:type rdf:resource="#Patient"/>
+  <scheduled_for rdf:resource="#Hip_Replacement_Surgery"/>
+  <admitted_at_time rdf:resource="#TimeSlot_14_00"/>
+  <has_severity rdf:resource="#Minor"/>
+  <admitted_to rdf:resource="#Orthopedic_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_C"/>
+  <undergoes_surgery rdf:resource="#Hip_Replacement_Surgery"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Patient_Linda_Williams">
-  <rdf:type rdf:resource="#Patient" />
-  <scheduled_for rdf:resource="#Appendectomy" />
-  <admitted_at_time rdf:resource="#TimeSlot_16_45" />
-  <has_severity rdf:resource="#Severe" />
-  <admitted_to rdf:resource="#General_Ward" />
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A" />
-  <undergoes_surgery rdf:resource="#Appendectomy" />
+  <rdf:type rdf:resource="#Patient"/>
+  <scheduled_for rdf:resource="#Appendectomy"/>
+  <admitted_at_time rdf:resource="#TimeSlot_16_45"/>
+  <has_severity rdf:resource="#Severe"/>
+  <admitted_to rdf:resource="#General_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
+  <undergoes_surgery rdf:resource="#Appendectomy"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Patient_John_Williams">
-  <rdf:type rdf:resource="#Patient" />
-  <admitted_at_time rdf:resource="#TimeSlot_19_30" />
-  <has_severity rdf:resource="#Moderate" />
-  <admitted_to rdf:resource="#General_Ward" />
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A" />
+  <rdf:type rdf:resource="#Patient"/>
+  <admitted_at_time rdf:resource="#TimeSlot_19_30"/>
+  <has_severity rdf:resource="#Moderate"/>
+  <admitted_to rdf:resource="#General_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Patient_Sarah_Brown">
-  <rdf:type rdf:resource="#Patient" />
-  <admitted_at_time rdf:resource="#TimeSlot_22_45" />
-  <has_severity rdf:resource="#Mild" />
-  <admitted_to rdf:resource="#General_Ward" />
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A" />
+  <rdf:type rdf:resource="#Patient"/>
+  <admitted_at_time rdf:resource="#TimeSlot_22_45"/>
+  <has_severity rdf:resource="#Mild"/>
+  <admitted_to rdf:resource="#General_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
 </owl:NamedIndividual>
 
 <owl:NamedIndividual rdf:about="#Padma Wickramage">
-  <rdf:type rdf:resource="#Patient" />
-  <has_severity rdf:resource="#Mild" />
-  <admitted_to rdf:resource="#Neurology_Ward" />
-  <assigned_to_recovery rdf:resource="#Recovery_Room_A" />
-  <undergoes_surgery rdf:resource="#Brain_Surgery" />
+  <rdf:type rdf:resource="#Patient"/>
+  <has_severity rdf:resource="#Mild"/>
+  <admitted_to rdf:resource="#Neurology_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_A"/>
+  <undergoes_surgery rdf:resource="#Brain_Surgery"/>
 </owl:NamedIndividual>
 
-<ns4:Variable rdf:about="urn:swrl#s" />
+<owl:NamedIndividual rdf:about="#Patient_Emergency_Case">
+  <rdf:type rdf:resource="#Patient"/>
+  <has_severity rdf:resource="#Severe"/>
+  <admitted_to rdf:resource="#Cardiology_Ward"/>
+  <assigned_to_recovery rdf:resource="#Recovery_Room_B"/>
+  <undergoes_surgery rdf:resource="#Cardiac_Bypass_Surgery"/>
+</owl:NamedIndividual>
 
-<ns4:Variable rdf:about="urn:swrl#op1" />
+<swrl:Variable rdf:about="urn:swrl#s"/>
 
-<ns4:Variable rdf:about="urn:swrl#op2" />
+<swrl:Variable rdf:about="urn:swrl#op1"/>
 
-<ns4:Variable rdf:about="urn:swrl#t1" />
+<swrl:Variable rdf:about="urn:swrl#op2"/>
 
-<ns4:Variable rdf:about="urn:swrl#t2" />
+<swrl:Variable rdf:about="urn:swrl#t1"/>
 
-<ns4:Variable rdf:about="urn:swrl#s1" />
+<swrl:Variable rdf:about="urn:swrl#t2"/>
 
-<ns4:Variable rdf:about="urn:swrl#th" />
+<swrl:Variable rdf:about="urn:swrl#s1"/>
 
-<ns4:Variable rdf:about="urn:swrl#s2" />
+<swrl:Variable rdf:about="urn:swrl#th"/>
 
-<ns4:Variable rdf:about="urn:swrl#op" />
+<swrl:Variable rdf:about="urn:swrl#s2"/>
 
-<ns4:Variable rdf:about="urn:swrl#wt" />
+<swrl:Variable rdf:about="urn:swrl#op"/>
 
-<ns4:Variable rdf:about="urn:swrl#p" />
+<swrl:Variable rdf:about="urn:swrl#wt"/>
 
-<ns4:Variable rdf:about="urn:swrl#t" />
+<swrl:Variable rdf:about="urn:swrl#p"/>
 
-<ns4:Variable rdf:about="urn:swrl#r" />
+<swrl:Variable rdf:about="urn:swrl#t"/>
 
-<ns4:Imp>
-  <ns4:body>
+<swrl:Variable rdf:about="urn:swrl#r"/>
+
+<swrl:Imp>
+  <swrl:body>
     <rdf:Description>
       <rdf:first>
-        <ns4:ClassAtom>
-          <ns4:classPredicate rdf:resource="#Surgeon" />
-          <ns4:argument1 rdf:resource="urn:swrl#s" />
-        </ns4:ClassAtom>
+        <swrl:ClassAtom>
+          <swrl:classPredicate rdf:resource="#Patient"/>
+          <swrl:argument1 rdf:resource="urn:swrl#p"/>
+        </swrl:ClassAtom>
       </rdf:first>
       <rdf:rest>
         <rdf:Description>
           <rdf:first>
-            <ns4:IndividualPropertyAtom>
-              <ns4:propertyPredicate rdf:resource="#performs_operation" />
-              <ns4:argument1 rdf:resource="urn:swrl#s" />
-              <ns4:argument2 rdf:resource="urn:swrl#op1" />
-            </ns4:IndividualPropertyAtom>
+            <swrl:IndividualPropertyAtom>
+              <swrl:propertyPredicate rdf:resource="#admitted_at_time"/>
+              <swrl:argument1 rdf:resource="urn:swrl#p"/>
+              <swrl:argument2 rdf:resource="urn:swrl#t"/>
+            </swrl:IndividualPropertyAtom>
           </rdf:first>
           <rdf:rest>
             <rdf:Description>
               <rdf:first>
-                <ns4:IndividualPropertyAtom>
-                  <ns4:propertyPredicate rdf:resource="#performs_operation" />
-                  <ns4:argument1 rdf:resource="urn:swrl#s" />
-                  <ns4:argument2 rdf:resource="urn:swrl#op2" />
-                </ns4:IndividualPropertyAtom>
+                <swrl:IndividualPropertyAtom>
+                  <swrl:propertyPredicate rdf:resource="#assigned_to_recovery"/>
+                  <swrl:argument1 rdf:resource="urn:swrl#p"/>
+                  <swrl:argument2 rdf:resource="urn:swrl#r"/>
+                </swrl:IndividualPropertyAtom>
+              </rdf:first>
+              <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+            </rdf:Description>
+          </rdf:rest>
+        </rdf:Description>
+      </rdf:rest>
+    </rdf:Description>
+  </swrl:body>
+  <swrl:head>
+    <rdf:Description>
+      <rdf:first>
+        <swrl:ClassAtom>
+          <swrl:classPredicate rdf:resource="#hasRecoverySchedule"/>
+          <swrl:argument1 rdf:resource="urn:swrl#p"/>
+        </swrl:ClassAtom>
+      </rdf:first>
+      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    </rdf:Description>
+  </swrl:head>
+</swrl:Imp>
+
+<swrl:Imp>
+  <swrl:body>
+    <rdf:Description>
+      <rdf:first>
+        <swrl:ClassAtom>
+          <swrl:classPredicate rdf:resource="#Surgeon"/>
+          <swrl:argument1 rdf:resource="urn:swrl#s"/>
+        </swrl:ClassAtom>
+      </rdf:first>
+      <rdf:rest>
+        <rdf:Description>
+          <rdf:first>
+            <swrl:IndividualPropertyAtom>
+              <swrl:propertyPredicate rdf:resource="#performs_operation"/>
+              <swrl:argument1 rdf:resource="urn:swrl#s"/>
+              <swrl:argument2 rdf:resource="urn:swrl#op"/>
+            </swrl:IndividualPropertyAtom>
+          </rdf:first>
+          <rdf:rest>
+            <rdf:Description>
+              <rdf:first>
+                <swrl:IndividualPropertyAtom>
+                  <swrl:propertyPredicate rdf:resource="#requires_theatre_type"/>
+                  <swrl:argument1 rdf:resource="urn:swrl#op"/>
+                  <swrl:argument2 rdf:resource="urn:swrl#th"/>
+                </swrl:IndividualPropertyAtom>
               </rdf:first>
               <rdf:rest>
                 <rdf:Description>
                   <rdf:first>
-                    <ns4:IndividualPropertyAtom>
-                      <ns4:propertyPredicate rdf:resource="#has_timeslot" />
-                      <ns4:argument1 rdf:resource="urn:swrl#op1" />
-                      <ns4:argument2 rdf:resource="urn:swrl#t1" />
-                    </ns4:IndividualPropertyAtom>
+                    <swrl:IndividualPropertyAtom>
+                      <swrl:propertyPredicate rdf:resource="#works_in_theatre"/>
+                      <swrl:argument1 rdf:resource="urn:swrl#s"/>
+                      <swrl:argument2 rdf:resource="urn:swrl#wt"/>
+                    </swrl:IndividualPropertyAtom>
                   </rdf:first>
                   <rdf:rest>
                     <rdf:Description>
                       <rdf:first>
-                        <ns4:IndividualPropertyAtom>
-                          <ns4:propertyPredicate rdf:resource="#has_timeslot" />
-                          <ns4:argument1 rdf:resource="urn:swrl#op2" />
-                          <ns4:argument2 rdf:resource="urn:swrl#t2" />
-                        </ns4:IndividualPropertyAtom>
+                        <swrl:DifferentIndividualsAtom>
+                          <swrl:argument1 rdf:resource="urn:swrl#th"/>
+                          <swrl:argument2 rdf:resource="urn:swrl#wt"/>
+                        </swrl:DifferentIndividualsAtom>
+                      </rdf:first>
+                      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                    </rdf:Description>
+                  </rdf:rest>
+                </rdf:Description>
+              </rdf:rest>
+            </rdf:Description>
+          </rdf:rest>
+        </rdf:Description>
+      </rdf:rest>
+    </rdf:Description>
+  </swrl:body>
+  <swrl:head>
+    <rdf:Description>
+      <rdf:first>
+        <swrl:ClassAtom>
+          <swrl:classPredicate rdf:resource="#SpecializationMismatch"/>
+          <swrl:argument1 rdf:resource="urn:swrl#s"/>
+        </swrl:ClassAtom>
+      </rdf:first>
+      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    </rdf:Description>
+  </swrl:head>
+</swrl:Imp>
+
+<swrl:Imp>
+  <swrl:body>
+    <rdf:Description>
+      <rdf:first>
+        <swrl:IndividualPropertyAtom>
+          <swrl:propertyPredicate rdf:resource="#requires_theatre_type"/>
+          <swrl:argument1 rdf:resource="urn:swrl#s1"/>
+          <swrl:argument2 rdf:resource="urn:swrl#th"/>
+        </swrl:IndividualPropertyAtom>
+      </rdf:first>
+      <rdf:rest>
+        <rdf:Description>
+          <rdf:first>
+            <swrl:IndividualPropertyAtom>
+              <swrl:propertyPredicate rdf:resource="#requires_theatre_type"/>
+              <swrl:argument1 rdf:resource="urn:swrl#s2"/>
+              <swrl:argument2 rdf:resource="urn:swrl#th"/>
+            </swrl:IndividualPropertyAtom>
+          </rdf:first>
+          <rdf:rest>
+            <rdf:Description>
+              <rdf:first>
+                <swrl:IndividualPropertyAtom>
+                  <swrl:propertyPredicate rdf:resource="#has_timeslot"/>
+                  <swrl:argument1 rdf:resource="urn:swrl#s1"/>
+                  <swrl:argument2 rdf:resource="urn:swrl#t1"/>
+                </swrl:IndividualPropertyAtom>
+              </rdf:first>
+              <rdf:rest>
+                <rdf:Description>
+                  <rdf:first>
+                    <swrl:IndividualPropertyAtom>
+                      <swrl:propertyPredicate rdf:resource="#has_timeslot"/>
+                      <swrl:argument1 rdf:resource="urn:swrl#s2"/>
+                      <swrl:argument2 rdf:resource="urn:swrl#t2"/>
+                    </swrl:IndividualPropertyAtom>
+                  </rdf:first>
+                  <rdf:rest>
+                    <rdf:Description>
+                      <rdf:first>
+                        <swrl:IndividualPropertyAtom>
+                          <swrl:propertyPredicate rdf:resource="#has_temporal_overlap"/>
+                          <swrl:argument1 rdf:resource="urn:swrl#t1"/>
+                          <swrl:argument2 rdf:resource="urn:swrl#t2"/>
+                        </swrl:IndividualPropertyAtom>
                       </rdf:first>
                       <rdf:rest>
                         <rdf:Description>
                           <rdf:first>
-                            <ns4:IndividualPropertyAtom>
-                              <ns4:propertyPredicate rdf:resource="#has_temporal_overlap" />
-                              <ns4:argument1 rdf:resource="urn:swrl#t1" />
-                              <ns4:argument2 rdf:resource="urn:swrl#t2" />
-                            </ns4:IndividualPropertyAtom>
+                            <swrl:DifferentIndividualsAtom>
+                              <swrl:argument1 rdf:resource="urn:swrl#s1"/>
+                              <swrl:argument2 rdf:resource="urn:swrl#s2"/>
+                            </swrl:DifferentIndividualsAtom>
+                          </rdf:first>
+                          <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                        </rdf:Description>
+                      </rdf:rest>
+                    </rdf:Description>
+                  </rdf:rest>
+                </rdf:Description>
+              </rdf:rest>
+            </rdf:Description>
+          </rdf:rest>
+        </rdf:Description>
+      </rdf:rest>
+    </rdf:Description>
+  </swrl:body>
+  <swrl:head>
+    <rdf:Description>
+      <rdf:first>
+        <swrl:ClassAtom>
+          <swrl:classPredicate rdf:resource="#TheatreConflict"/>
+          <swrl:argument1 rdf:resource="urn:swrl#th"/>
+        </swrl:ClassAtom>
+      </rdf:first>
+      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    </rdf:Description>
+  </swrl:head>
+</swrl:Imp>
+
+<swrl:Imp>
+  <swrl:body>
+    <rdf:Description>
+      <rdf:first>
+        <swrl:ClassAtom>
+          <swrl:classPredicate rdf:resource="#Surgeon"/>
+          <swrl:argument1 rdf:resource="urn:swrl#s"/>
+        </swrl:ClassAtom>
+      </rdf:first>
+      <rdf:rest>
+        <rdf:Description>
+          <rdf:first>
+            <swrl:IndividualPropertyAtom>
+              <swrl:propertyPredicate rdf:resource="#performs_operation"/>
+              <swrl:argument1 rdf:resource="urn:swrl#s"/>
+              <swrl:argument2 rdf:resource="urn:swrl#op1"/>
+            </swrl:IndividualPropertyAtom>
+          </rdf:first>
+          <rdf:rest>
+            <rdf:Description>
+              <rdf:first>
+                <swrl:IndividualPropertyAtom>
+                  <swrl:propertyPredicate rdf:resource="#performs_operation"/>
+                  <swrl:argument1 rdf:resource="urn:swrl#s"/>
+                  <swrl:argument2 rdf:resource="urn:swrl#op2"/>
+                </swrl:IndividualPropertyAtom>
+              </rdf:first>
+              <rdf:rest>
+                <rdf:Description>
+                  <rdf:first>
+                    <swrl:IndividualPropertyAtom>
+                      <swrl:propertyPredicate rdf:resource="#has_timeslot"/>
+                      <swrl:argument1 rdf:resource="urn:swrl#op1"/>
+                      <swrl:argument2 rdf:resource="urn:swrl#t1"/>
+                    </swrl:IndividualPropertyAtom>
+                  </rdf:first>
+                  <rdf:rest>
+                    <rdf:Description>
+                      <rdf:first>
+                        <swrl:IndividualPropertyAtom>
+                          <swrl:propertyPredicate rdf:resource="#has_timeslot"/>
+                          <swrl:argument1 rdf:resource="urn:swrl#op2"/>
+                          <swrl:argument2 rdf:resource="urn:swrl#t2"/>
+                        </swrl:IndividualPropertyAtom>
+                      </rdf:first>
+                      <rdf:rest>
+                        <rdf:Description>
+                          <rdf:first>
+                            <swrl:IndividualPropertyAtom>
+                              <swrl:propertyPredicate rdf:resource="#has_temporal_overlap"/>
+                              <swrl:argument1 rdf:resource="urn:swrl#t1"/>
+                              <swrl:argument2 rdf:resource="urn:swrl#t2"/>
+                            </swrl:IndividualPropertyAtom>
                           </rdf:first>
                           <rdf:rest>
                             <rdf:Description>
                               <rdf:first>
-                                <ns4:DifferentIndividualsAtom>
-                                  <ns4:argument1 rdf:resource="urn:swrl#op1" />
-                                  <ns4:argument2 rdf:resource="urn:swrl#op2" />
-                                </ns4:DifferentIndividualsAtom>
+                                <swrl:DifferentIndividualsAtom>
+                                  <swrl:argument1 rdf:resource="urn:swrl#op1"/>
+                                  <swrl:argument2 rdf:resource="urn:swrl#op2"/>
+                                </swrl:DifferentIndividualsAtom>
                               </rdf:first>
-                              <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
+                              <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                             </rdf:Description>
                           </rdf:rest>
                         </rdf:Description>
@@ -633,214 +844,19 @@
         </rdf:Description>
       </rdf:rest>
     </rdf:Description>
-  </ns4:body>
-  <ns4:head>
+  </swrl:body>
+  <swrl:head>
     <rdf:Description>
       <rdf:first>
-        <ns4:ClassAtom>
-          <ns4:classPredicate rdf:resource="#SchedulingConflict" />
-          <ns4:argument1 rdf:resource="urn:swrl#s" />
-        </ns4:ClassAtom>
+        <swrl:ClassAtom>
+          <swrl:classPredicate rdf:resource="#SchedulingConflict"/>
+          <swrl:argument1 rdf:resource="urn:swrl#s"/>
+        </swrl:ClassAtom>
       </rdf:first>
-      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
+      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
     </rdf:Description>
-  </ns4:head>
-</ns4:Imp>
-
-<ns4:Imp>
-  <ns4:body>
-    <rdf:Description>
-      <rdf:first>
-        <ns4:IndividualPropertyAtom>
-          <ns4:propertyPredicate rdf:resource="#requires_theatre_type" />
-          <ns4:argument1 rdf:resource="urn:swrl#s1" />
-          <ns4:argument2 rdf:resource="urn:swrl#th" />
-        </ns4:IndividualPropertyAtom>
-      </rdf:first>
-      <rdf:rest>
-        <rdf:Description>
-          <rdf:first>
-            <ns4:IndividualPropertyAtom>
-              <ns4:propertyPredicate rdf:resource="#requires_theatre_type" />
-              <ns4:argument1 rdf:resource="urn:swrl#s2" />
-              <ns4:argument2 rdf:resource="urn:swrl#th" />
-            </ns4:IndividualPropertyAtom>
-          </rdf:first>
-          <rdf:rest>
-            <rdf:Description>
-              <rdf:first>
-                <ns4:IndividualPropertyAtom>
-                  <ns4:propertyPredicate rdf:resource="#has_timeslot" />
-                  <ns4:argument1 rdf:resource="urn:swrl#s1" />
-                  <ns4:argument2 rdf:resource="urn:swrl#t1" />
-                </ns4:IndividualPropertyAtom>
-              </rdf:first>
-              <rdf:rest>
-                <rdf:Description>
-                  <rdf:first>
-                    <ns4:IndividualPropertyAtom>
-                      <ns4:propertyPredicate rdf:resource="#has_timeslot" />
-                      <ns4:argument1 rdf:resource="urn:swrl#s2" />
-                      <ns4:argument2 rdf:resource="urn:swrl#t2" />
-                    </ns4:IndividualPropertyAtom>
-                  </rdf:first>
-                  <rdf:rest>
-                    <rdf:Description>
-                      <rdf:first>
-                        <ns4:IndividualPropertyAtom>
-                          <ns4:propertyPredicate rdf:resource="#has_temporal_overlap" />
-                          <ns4:argument1 rdf:resource="urn:swrl#t1" />
-                          <ns4:argument2 rdf:resource="urn:swrl#t2" />
-                        </ns4:IndividualPropertyAtom>
-                      </rdf:first>
-                      <rdf:rest>
-                        <rdf:Description>
-                          <rdf:first>
-                            <ns4:DifferentIndividualsAtom>
-                              <ns4:argument1 rdf:resource="urn:swrl#s1" />
-                              <ns4:argument2 rdf:resource="urn:swrl#s2" />
-                            </ns4:DifferentIndividualsAtom>
-                          </rdf:first>
-                          <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
-                        </rdf:Description>
-                      </rdf:rest>
-                    </rdf:Description>
-                  </rdf:rest>
-                </rdf:Description>
-              </rdf:rest>
-            </rdf:Description>
-          </rdf:rest>
-        </rdf:Description>
-      </rdf:rest>
-    </rdf:Description>
-  </ns4:body>
-  <ns4:head>
-    <rdf:Description>
-      <rdf:first>
-        <ns4:ClassAtom>
-          <ns4:classPredicate rdf:resource="#TheatreConflict" />
-          <ns4:argument1 rdf:resource="urn:swrl#th" />
-        </ns4:ClassAtom>
-      </rdf:first>
-      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
-    </rdf:Description>
-  </ns4:head>
-</ns4:Imp>
-
-<ns4:Imp>
-  <ns4:body>
-    <rdf:Description>
-      <rdf:first>
-        <ns4:ClassAtom>
-          <ns4:classPredicate rdf:resource="#Surgeon" />
-          <ns4:argument1 rdf:resource="urn:swrl#s" />
-        </ns4:ClassAtom>
-      </rdf:first>
-      <rdf:rest>
-        <rdf:Description>
-          <rdf:first>
-            <ns4:IndividualPropertyAtom>
-              <ns4:propertyPredicate rdf:resource="#performs_operation" />
-              <ns4:argument1 rdf:resource="urn:swrl#s" />
-              <ns4:argument2 rdf:resource="urn:swrl#op" />
-            </ns4:IndividualPropertyAtom>
-          </rdf:first>
-          <rdf:rest>
-            <rdf:Description>
-              <rdf:first>
-                <ns4:IndividualPropertyAtom>
-                  <ns4:propertyPredicate rdf:resource="#requires_theatre_type" />
-                  <ns4:argument1 rdf:resource="urn:swrl#op" />
-                  <ns4:argument2 rdf:resource="urn:swrl#th" />
-                </ns4:IndividualPropertyAtom>
-              </rdf:first>
-              <rdf:rest>
-                <rdf:Description>
-                  <rdf:first>
-                    <ns4:IndividualPropertyAtom>
-                      <ns4:propertyPredicate rdf:resource="#works_in_theatre" />
-                      <ns4:argument1 rdf:resource="urn:swrl#s" />
-                      <ns4:argument2 rdf:resource="urn:swrl#wt" />
-                    </ns4:IndividualPropertyAtom>
-                  </rdf:first>
-                  <rdf:rest>
-                    <rdf:Description>
-                      <rdf:first>
-                        <ns4:DifferentIndividualsAtom>
-                          <ns4:argument1 rdf:resource="urn:swrl#th" />
-                          <ns4:argument2 rdf:resource="urn:swrl#wt" />
-                        </ns4:DifferentIndividualsAtom>
-                      </rdf:first>
-                      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
-                    </rdf:Description>
-                  </rdf:rest>
-                </rdf:Description>
-              </rdf:rest>
-            </rdf:Description>
-          </rdf:rest>
-        </rdf:Description>
-      </rdf:rest>
-    </rdf:Description>
-  </ns4:body>
-  <ns4:head>
-    <rdf:Description>
-      <rdf:first>
-        <ns4:ClassAtom>
-          <ns4:classPredicate rdf:resource="#SpecializationMismatch" />
-          <ns4:argument1 rdf:resource="urn:swrl#s" />
-        </ns4:ClassAtom>
-      </rdf:first>
-      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
-    </rdf:Description>
-  </ns4:head>
-</ns4:Imp>
-
-<ns4:Imp>
-  <ns4:body>
-    <rdf:Description>
-      <rdf:first>
-        <ns4:ClassAtom>
-          <ns4:classPredicate rdf:resource="#Patient" />
-          <ns4:argument1 rdf:resource="urn:swrl#p" />
-        </ns4:ClassAtom>
-      </rdf:first>
-      <rdf:rest>
-        <rdf:Description>
-          <rdf:first>
-            <ns4:IndividualPropertyAtom>
-              <ns4:propertyPredicate rdf:resource="#admitted_at_time" />
-              <ns4:argument1 rdf:resource="urn:swrl#p" />
-              <ns4:argument2 rdf:resource="urn:swrl#t" />
-            </ns4:IndividualPropertyAtom>
-          </rdf:first>
-          <rdf:rest>
-            <rdf:Description>
-              <rdf:first>
-                <ns4:IndividualPropertyAtom>
-                  <ns4:propertyPredicate rdf:resource="#assigned_to_recovery" />
-                  <ns4:argument1 rdf:resource="urn:swrl#p" />
-                  <ns4:argument2 rdf:resource="urn:swrl#r" />
-                </ns4:IndividualPropertyAtom>
-              </rdf:first>
-              <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
-            </rdf:Description>
-          </rdf:rest>
-        </rdf:Description>
-      </rdf:rest>
-    </rdf:Description>
-  </ns4:body>
-  <ns4:head>
-    <rdf:Description>
-      <rdf:first>
-        <ns4:ClassAtom>
-          <ns4:classPredicate rdf:resource="#hasRecoverySchedule" />
-          <ns4:argument1 rdf:resource="urn:swrl#p" />
-        </ns4:ClassAtom>
-      </rdf:first>
-      <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil" />
-    </rdf:Description>
-  </ns4:head>
-</ns4:Imp>
+  </swrl:head>
+</swrl:Imp>
 
 
 </rdf:RDF>

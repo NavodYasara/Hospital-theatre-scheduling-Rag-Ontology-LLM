@@ -271,11 +271,15 @@ def main():
                     
                     if schedule:
                         for item in schedule:
+                            # Get patient info for this surgery
+                            surgery_info = onto_mgr.get_schedule_info(item['surgery'])
+                            
                             with st.container():
-                                col1, col2, col3 = st.columns(3)
+                                col1, col2, col3, col4 = st.columns(4)
                                 col1.write(f"**{item['surgery']}**")
                                 col2.write(f"🕐 {item['start_time']} - {item['end_time']}")
                                 col3.write(f"🏥 {item['theatre']}")
+                                col4.write(f"👤 {surgery_info['patient_name'] if surgery_info else 'N/A'}")
                                 st.markdown("---")
                     else:
                         st.info("No surgeries scheduled for this surgeon")
@@ -295,11 +299,15 @@ def main():
                     
                     if schedule:
                         for item in schedule:
+                            # Get patient info for this surgery
+                            surgery_info = onto_mgr.get_schedule_info(item['surgery'])
+                            
                             with st.container():
-                                col1, col2, col3 = st.columns(3)
+                                col1, col2, col3, col4 = st.columns(4)
                                 col1.write(f"**{item['surgery']}**")
                                 col2.write(f"👨‍⚕️ {item['surgeon']}")
                                 col3.write(f"🕐 {item['start_time']} - {item['end_time']}")
+                                col4.write(f"👤 {surgery_info['patient_name'] if surgery_info else 'N/A'}")
                                 st.markdown("---")
                     else:
                         st.info("No surgeries scheduled in this theatre")
@@ -319,7 +327,10 @@ def main():
                         
                         if surgeries:
                             for surgery in surgeries:
-                                col1, col2, col3 = st.columns(3)
+                                # Get patient info for this surgery
+                                surgery_info = onto_mgr.get_schedule_info(surgery.name)
+                                
+                                col1, col2, col3, col4 = st.columns(4)
                                 col1.write(f"**Surgery:** {surgery.name}")
                                 
                                 surgeon = surgery.performs_operation[0].name if surgery.performs_operation else 'N/A'
@@ -327,6 +338,9 @@ def main():
                                 
                                 theatre = surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A'
                                 col3.write(f"**Theatre:** {theatre}")
+                                
+                                patient = surgery_info['patient_name'] if surgery_info else 'N/A'
+                                col4.write(f"**Patient:** {patient}")
                                 
                                 st.markdown("---")
                         else:
