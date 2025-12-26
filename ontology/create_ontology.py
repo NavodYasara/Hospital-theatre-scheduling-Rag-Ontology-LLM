@@ -27,7 +27,7 @@ def create_hospital_ontology():
     
     # Get the ontology file path
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    owl_file = os.path.join(current_dir, "ontology", "hospital.owl")
+    owl_file = os.path.join(current_dir, "ontology", "hospital2.owl")
     
     # Check if file exists
     if os.path.exists(owl_file):
@@ -43,7 +43,7 @@ def create_hospital_ontology():
     print()
     
     # Create ontology
-    onto = get_ontology("http://test.org/hospital.owl")
+    onto = get_ontology("http://test.org/hospital2.owl")
     
     with onto:
         # ====================================================================
@@ -51,29 +51,13 @@ def create_hospital_ontology():
         # ====================================================================
         print("Step 1/7: Creating top-level classes...")
         
-        class Person(Thing):
-            """Base class for all persons in the hospital"""
-            pass
         
-        class Location(Thing):
-            """Base class for all physical locations"""
-            pass
-        
-        class TimeEntity(Thing):
-            """Base class for temporal entities"""
-            pass
-        
-        class ClinicalProcess(Thing):
-            """Base class for clinical processes"""
-            pass
-        
-        class Severity(Thing):
-            """Classification of patient severity levels"""
-            pass
-        
-        class SchedulingConflict(Thing):
-            """Base class for scheduling conflicts"""
-            pass
+        class Person(Thing):pass #Base class for all persons in the hospital
+        class Location(Thing):pass #Base class for all physical locations
+        class TimeEntity(Thing):pass  #Base class for temporal entities   
+        class ClinicalProcess(Thing):pass #Base class for clinical processes
+        class Severity(Thing):pass #Classification of patient severity levels
+        class SchedulingConflict(Thing):pass #Base class for scheduling conflicts
         
         # ====================================================================
         # STEP 2: Define Subclasses
@@ -81,191 +65,104 @@ def create_hospital_ontology():
         print("Step 2/7: Creating specialized subclasses...")
         
         # Person Subclasses
-        class Staff(Person):
-            """Hospital staff members"""
-            pass
-        
-        class Patient(Person):
-            """Patients undergoing treatment"""
-            pass
+        class Staff(Person):pass #Hospital staff members
+        class Patient(Person):pass #Patients undergoing treatment
         
         # Staff Subclasses
-        class Surgeon(Staff):
-            """Surgeons who perform operations"""
-            pass
-        
-        class Anaesthetist(Staff):
-            """Anaesthesia specialists"""
-            pass
-        
-        class Nurse(Staff):
-            """Nursing staff"""
-            pass
+        class Surgeon(Staff):pass #Surgeons who perform operations
+        class Anaesthetist(Staff):pass #Anaesthesia specialists
+        class Nurse(Staff):pass #Nursing staff
         
         # Surgeon Specializations
-        class NeuroSurgeon(Surgeon):
-            """Neurosurgery specialists"""
-            pass
-        
-        class OrthopedicSurgeon(Surgeon):
-            """Orthopedic surgery specialists"""
-            pass
-        
-        class GeneralSurgeon(Surgeon):
-            """General surgery specialists"""
-            pass
+        class NeuroSurgeon(Surgeon):pass #Neurosurgery specialists
+        class OrthopedicSurgeon(Surgeon):pass #Orthopedic surgery specialists
+        class GeneralSurgeon(Surgeon):pass #General surgery specialists
         
         # Location Subclasses
-        class Theatre(Location):
-            """Operating theatres"""
-            pass
-        
-        class Ward(Location):
-            """Hospital wards for patient admission"""
-            pass
-        
-        class RecoveryRoom(Location):
-            """Post-operative recovery rooms"""
-            pass
+        class Theatre(Location):pass #Operating theatres
+        class Ward(Location):pass #Hospital wards for patient admission
+        class RecoveryRoom(Location):pass #Post-operative recovery rooms
         
         # Theatre Types
-        class NeuroTheatre(Theatre):
-            """Neurosurgery theatre"""
-            pass
-        
-        class OrthoTheatre(Theatre):
-            """Orthopedic surgery theatre"""
-            pass
-        
-        class CardioTheatre(Theatre):
-            """Cardiac surgery theatre"""
-            pass
-        
-        class GeneralTheatre(Theatre):
-            """General surgery theatre"""
-            pass
+        class NeuroTheatre(Theatre):pass #Neurosurgery theatre
+        class OrthoTheatre(Theatre):pass #Orthopedic surgery theatre
+        class CardioTheatre(Theatre):pass #Cardiac surgery theatre
+        class GeneralTheatre(Theatre):pass #General surgery theatre
         
         # Time Entity Subclasses
-        class TimeSlot(TimeEntity):
-            """Scheduled time slots for operations"""
-            pass
+        class TimeSlot(TimeEntity):pass #Scheduled time slots for operations
         
         # Clinical Process Subclasses
-        class MedicalProcedure(ClinicalProcess):
-            """Medical procedures"""
-            pass
-        
-        class Surgery(MedicalProcedure):
-            """Surgical operations"""
-            pass
+        class MedicalProcedure(ClinicalProcess):pass #Medical procedures
+        class Surgery(MedicalProcedure):pass #Surgical operations
         
         # Conflict Types
-        class TheatreConflict(SchedulingConflict):
-            """Theatre double-booking conflicts"""
-            pass
+        class TheatreConflict(SchedulingConflict):pass #Theatre double-booking conflicts
+        class SpecializationMismatch(SchedulingConflict):pass #Surgeon-theatre specialization mismatches
         
-        class SpecializationMismatch(SchedulingConflict):
-            """Surgeon-theatre specialization mismatches"""
-            pass
-        
-        class hasRecoverySchedule(Thing):
-            """Marker class for patients with recovery schedules"""
-            pass
+        class hasRecoverySchedule(Thing):pass #Marker class for patients with recovery schedules
         
         # ====================================================================
         # STEP 3: Define Object Properties (Relationships)
         # ====================================================================
         print("Step 3/7: Creating object properties (relationships)...")
         
-        class performs_operation(ObjectProperty):
-            """Surgeon performs a surgery"""
-            domain = [Surgeon]
-            range = [Surgery]
+        class performs_operation(ObjectProperty): #Surgeon performs a surgery
+            domain = [Surgeon];range = [Surgery]
         
-        class has_timeslot(ObjectProperty):
-            """Surgery has a scheduled timeslot"""
-            domain = [Surgery]
-            range = [TimeSlot]
+        class has_timeslot(ObjectProperty): #Surgery has a scheduled timeslot
+            domain = [Surgery];range = [TimeSlot]
         
-        class requires_theatre_type(ObjectProperty):
-            """Surgery requires a specific theatre type"""
-            domain = [Surgery]
-            range = [Theatre]
+        class requires_theatre_type(ObjectProperty): #Surgery requires a specific theatre type
+            domain = [Surgery];range = [Theatre]
         
-        class works_in_theatre(ObjectProperty):
-            """Staff member works in a theatre"""
-            domain = [Staff]
-            range = [Theatre]
+        class works_in_theatre(ObjectProperty): #Staff member works in a theatre
+            domain = [Staff];range = [Theatre]
         
-        class has_assigned_staff(ObjectProperty):
-            """Surgery has assigned staff members"""
-            domain = [Surgery]
-            range = [Staff]
+        class has_assigned_staff(ObjectProperty): #Surgery has assigned staff members
+            domain = [Surgery];range = [Staff]
         
-        class undergoes_surgery(ObjectProperty):
-            """Patient undergoes a surgery"""
-            domain = [Patient]
-            range = [Surgery]
+        class undergoes_surgery(ObjectProperty): #Patient undergoes a surgery
+            domain = [Patient];range = [Surgery]
         
-        class scheduled_for(ObjectProperty):
-            """Patient is scheduled for a surgery"""
-            domain = [Patient]
-            range = [Surgery]
+        class scheduled_for(ObjectProperty): #Patient is scheduled for a surgery
+            domain = [Patient];range = [Surgery]
         
-        class has_severity(ObjectProperty):
-            """Patient has a severity level"""
-            domain = [Patient]
-            range = [Severity]
+        class has_severity(ObjectProperty): #Patient has a severity level
+            domain = [Patient];range = [Severity]
         
-        class admitted_to(ObjectProperty):
-            """Patient admitted to a ward"""
-            domain = [Patient]
-            range = [Ward]
+        class admitted_to(ObjectProperty): #Patient admitted to a ward
+            domain = [Patient];range = [Ward]
         
-        class admitted_at_time(ObjectProperty):
-            """Patient admitted at a specific time"""
-            domain = [Patient]
-            range = [TimeSlot]
+        class admitted_at_time(ObjectProperty): #Patient admitted at a specific time
+            domain = [Patient];range = [TimeSlot]
         
-        class assigned_to_recovery(ObjectProperty):
-            """Patient assigned to a recovery room"""
-            domain = [Patient]
-            range = [RecoveryRoom]
+        class assigned_to_recovery(ObjectProperty): #Patient assigned to a recovery room
+            domain = [Patient];range = [RecoveryRoom]
         
-        class discharged_from(ObjectProperty):
-            """Patient discharged from a ward"""
-            domain = [Patient]
-            range = [Ward]
+        class discharged_from(ObjectProperty): #Patient discharged from a ward
+            domain = [Patient];range = [Ward]
         
-        class occurs_in(ObjectProperty):
-            """Clinical process occurs in a location"""
-            domain = [ClinicalProcess]
-            range = [Location]
+        class discharged_at_time(ObjectProperty): #Patient discharged at a specific time
+            domain = [Patient];range = [TimeSlot]
         
-        class requires_postop_care_in(ObjectProperty):
-            """Surgery requires post-op care in a location"""
-            domain = [Surgery]
-            range = [Location]
+        class occurs_in(ObjectProperty): #Clinical process occurs in a location
+            domain = [ClinicalProcess];range = [Location]
         
-        class has_temporal_overlap(ObjectProperty):
-            """Timeslots have temporal overlap"""
-            domain = [TimeSlot]
-            range = [TimeSlot]
+        class requires_postop_care_in(ObjectProperty): #Surgery requires post-op care in a location
+            domain = [Surgery];range = [Location]
         
-        class available_during(ObjectProperty):
-            """Staff available during a timeslot"""
-            domain = [Staff]
-            range = [TimeSlot]
+        class has_temporal_overlap(ObjectProperty): #Timeslots have temporal overlap
+            domain = [TimeSlot];range = [TimeSlot]
         
-        class assigned_to_surgery(ObjectProperty):
-            """Staff assigned to a surgery"""
-            domain = [Staff]
-            range = [Surgery]
+        class available_during(ObjectProperty): #Staff available during a timeslot
+            domain = [Staff];range = [TimeSlot]
         
-        class on_duty_in(ObjectProperty):
-            """Staff on duty in a ward"""
-            domain = [Staff]
-            range = [Ward]
+        class assigned_to_surgery(ObjectProperty): #Staff assigned to a surgery
+            domain = [Staff];range = [Surgery]
+        
+        class on_duty_in(ObjectProperty): #Staff on duty in a ward
+            domain = [Staff];range = [Ward]
         
         # ====================================================================
         # STEP 4: Define Data Properties (Attributes)
@@ -273,62 +170,50 @@ def create_hospital_ontology():
         print("Step 4/7: Creating data properties (attributes)...")
         
         class has_license_number(DataProperty, FunctionalProperty):
-            """Surgeon's license number"""
             domain = [Surgeon]
             range = [int]
         
         class start_time(DataProperty, FunctionalProperty):
-            """Start time of a timeslot"""
             domain = [TimeSlot]
             range = [str]
         
         class end_time(DataProperty, FunctionalProperty):
-            """End time of a timeslot"""
             domain = [TimeSlot]
             range = [str]
         
         class date(DataProperty, FunctionalProperty):
-            """Date of a timeslot"""
             domain = [TimeSlot]
             range = [str]
         
         class duration(DataProperty, FunctionalProperty):
-            """Duration in minutes"""
             domain = [TimeSlot]
             range = [int]
         
         class estimated_duration(DataProperty, FunctionalProperty):
-            """Estimated duration of surgery in minutes"""
             domain = [Surgery]
             range = [int]
         
         class is_emergency(DataProperty, FunctionalProperty):
-            """Whether surgery is emergency"""
             domain = [Surgery]
             range = [bool]
         
         class surgery_status(DataProperty, FunctionalProperty):
-            """Status of surgery"""
             domain = [Surgery]
             range = [str]
         
         class actual_start_time(DataProperty):
-            """Actual start time of surgery"""
             domain = [Surgery]
             range = [str]
         
         class actual_end_time(DataProperty):
-            """Actual end time of surgery"""
             domain = [Surgery]
             range = [str]
         
         class availability_status(DataProperty):
-            """Staff availability status"""
             domain = [Staff]
             range = [bool]
         
         class severity_level(DataProperty, FunctionalProperty):
-            """Severity level description"""
             domain = [Severity]
             range = [str]
         
