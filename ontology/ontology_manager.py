@@ -425,6 +425,150 @@ class OntologyManager:
             print(f"❌ Error getting patient info: {e}")
             return None
     
+    # ========== CONFLICT CHECKING METHODS ==========
+    
+    def check_prospective_conflicts(self, surgeon_name: str, theatre_name: str, 
+                                   timeslot_name: str, is_emergency: bool = False) -> Dict:
+        """
+        Check for conflicts BEFORE adding a new surgery
+        Returns: Dict with conflict details and severity information
+        """
+        conflicts = {
+            'has_conflicts': False,
+            'surgeon_conflict': None,
+            'theatre_conflict': None,
+            'patient_conflict': None,
+            'can_override': False,
+            'recommendations': []
+        }
+        
+        try:
+            # Get the timeslot
+            timeslot = self.onto.search_one(iri=f"*{timeslot_name}")
+            if not timeslot:
+                return conflicts
+            
+            # Check all existing surgeries in this timeslot
+            for surgery in self.onto.Surgery.instances():
+                if not surgery.has_timeslot or surgery.has_timeslot[0] != timeslot:
+                    continue
+                
+                # Get existing surgery details
+                existing_surgeon = surgery.performs_operation[0].name if surgery.performs_operation else None
+                existing_theatre = surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else None
+                existing_emergency = surgery.is_emergency[0] if surgery.is_emergency else False
+                
+                # Get patient severity
+                existing_patient = None
+                existing_severity = "Unknown"
+                for p in self.onto.Patient.instances():
+                    if surgery in p.undergoes_surgery:
+                        existing_patient = p
+                        if p.has_severity and p.has_severity[0].severity_level:
+                            existing_severity = p.has_severity[0].severity_level[0]
+                        break
+                
+                # Surgeon conflict
+                if existing_surgeon == surgeon_name:
+                    conflicts['has_conflicts'] = True
+                    conflicts['surgeon_conflict'] = {
+                        'conflicting_surgery': surgery.name,
+                        'patient': existing_patient.name if existing_patient else 'N/A',
+                        'severity': existing_severity,
+                        'is_emergency': existing_emergency,
+                        'theatre': existing_theatre
+                    }
+                
+                # Theatre conflict
+                if existing_theatre == theatre_name:
+                    conflicts['has_conflicts'] = True
+                    conflicts['theatre_conflict'] = {
+                        'conflicting_surgery': surgery.name,
+                        'patient': existing_patient.name if existing_patient else 'N/A',
+                        'severity': existing_severity,
+                        'is_emergency': existing_emergency,
+                        'surgeon': existing_surgeon
+                    }
+            
+            # Determine if override is allowed (emergency overriding non-emergency)
+            if conflicts['has_conflicts'] and is_emergency:
+                # Check if existing surgery is non-emergency or lower severity
+                severity_priority = {'Severe': 4, 'Moderate': 3, 'Mild': 2, 'Minor': 1, 'Unknown': 0}
+                
+                if conflicts['surgeon_conflict']:
+                    existing_priority = severity_priority.get(conflicts['surgeon_conflict']['severity'], 0)
+                    if not conflicts['surgeon_conflict']['is_emergency'] or existing_priority < 4:
+                        conflicts['can_override'] = True
+                        conflicts['recommendations'].append(
+                            f"This emergency surgery can override {conflicts['surgeon_conflict']['conflicting_surgery']} "
+                            f"(Severity: {conflicts['surgeon_conflict']['severity']}). Consider rescheduling the existing surgery."
+                        )
+                
+                if conflicts['theatre_conflict']:
+                    existing_priority = severity_priority.get(conflicts['theatre_conflict']['severity'], 0)
+                    if not conflicts['theatre_conflict']['is_emergency'] or existing_priority < 4:
+                        conflicts['can_override'] = True
+                        conflicts['recommendations'].append(
+                            f"This emergency surgery can override {conflicts['theatre_conflict']['conflicting_surgery']} "
+                            f"(Severity: {conflicts['theatre_conflict']['severity']}). The existing surgery should be moved."
+                        )
+            
+            return conflicts
+            
+        except Exception as e:
+            print(f"❌ Error checking prospective conflicts: {e}")
+            return conflicts
+    
+    def find_alternative_timeslots(self, surgeon_name: str = None, theatre_name: str = None, 
+                                  exclude_timeslot: str = None) -> List[Dict]:
+        """
+        Find alternative available timeslots for rescheduling
+        Returns list of available timeslots with conflict information
+        """
+        alternatives = []
+        
+        try:
+            all_timeslots = self.get_all_timeslots()
+            
+            for ts in all_timeslots:
+                if exclude_timeslot and ts.name == exclude_timeslot:
+                    continue
+                
+                is_available = True
+                conflicts = []
+                
+                # Check if surgeon is busy
+                if surgeon_name:
+                    for surgery in self.onto.Surgery.instances():
+                        if (surgery.has_timeslot and surgery.has_timeslot[0] == ts and
+                            surgery.performs_operation and surgery.performs_operation[0].name == surgeon_name):
+                            is_available = False
+                            conflicts.append(f"Surgeon busy with {surgery.name}")
+                
+                # Check if theatre is busy
+                if theatre_name:
+                    for surgery in self.onto.Surgery.instances():
+                        if (surgery.has_timeslot and surgery.has_timeslot[0] == ts and
+                            surgery.requires_theatre_type and surgery.requires_theatre_type[0].name == theatre_name):
+                            is_available = False
+                            conflicts.append(f"Theatre occupied by {surgery.name}")
+                
+                alternatives.append({
+                    'timeslot': ts.name,
+                    'start_time': ts.start_time[0] if ts.start_time else 'N/A',
+                    'end_time': ts.end_time[0] if ts.end_time else 'N/A',
+                    'is_available': is_available,
+                    'conflicts': conflicts
+                })
+            
+            # Sort by availability
+            alternatives.sort(key=lambda x: (not x['is_available'], x['start_time']))
+            return alternatives
+            
+        except Exception as e:
+            print(f"❌ Error finding alternative timeslots: {e}")
+            return []
+    
     # ========== UTILITY METHODS ==========
     
     def count_entities(self) -> int:

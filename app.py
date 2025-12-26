@@ -271,10 +271,19 @@ def main():
                     
                     if schedule:
                         for item in schedule:
-                            # Get patient info for this surgery
+                            # Get patient info and severity
                             surgery_info = onto_mgr.get_schedule_info(item['surgery'])
+                            is_emergency = surgery_info['is_emergency'] if surgery_info else False
+                            patient_info = onto_mgr.get_patient_info(surgery_info['patient_name']) if surgery_info and surgery_info['patient_name'] != 'N/A' else None
+                            severity = patient_info['severity'] if patient_info else 'Unknown'
                             
                             with st.container():
+                                # Emergency badge
+                                if is_emergency:
+                                    st.error(f"🚨 **EMERGENCY** | Severity: **{severity}**")
+                                else:
+                                    st.info(f"📋 Routine | Severity: {severity}")
+                                
                                 col1, col2, col3, col4 = st.columns(4)
                                 col1.write(f"**{item['surgery']}**")
                                 col2.write(f"🕐 {item['start_time']} - {item['end_time']}")
@@ -299,10 +308,19 @@ def main():
                     
                     if schedule:
                         for item in schedule:
-                            # Get patient info for this surgery
+                            # Get patient info and severity
                             surgery_info = onto_mgr.get_schedule_info(item['surgery'])
+                            is_emergency = surgery_info['is_emergency'] if surgery_info else False
+                            patient_info = onto_mgr.get_patient_info(surgery_info['patient_name']) if surgery_info and surgery_info['patient_name'] != 'N/A' else None
+                            severity = patient_info['severity'] if patient_info else 'Unknown'
                             
                             with st.container():
+                                # Emergency badge
+                                if is_emergency:
+                                    st.error(f"🚨 **EMERGENCY** | Severity: **{severity}**")
+                                else:
+                                    st.info(f"📋 Routine | Severity: {severity}")
+                                
                                 col1, col2, col3, col4 = st.columns(4)
                                 col1.write(f"**{item['surgery']}**")
                                 col2.write(f"👨‍⚕️ {item['surgeon']}")
@@ -327,8 +345,18 @@ def main():
                         
                         if surgeries:
                             for surgery in surgeries:
-                                # Get patient info for this surgery
+                                # Get patient info and severity
                                 surgery_info = onto_mgr.get_schedule_info(surgery.name)
+                                is_emergency = surgery_info['is_emergency'] if surgery_info else False
+                                patient_name = surgery_info['patient_name'] if surgery_info else 'N/A'
+                                patient_info = onto_mgr.get_patient_info(patient_name) if patient_name != 'N/A' else None
+                                severity = patient_info['severity'] if patient_info else 'Unknown'
+                                
+                                # Emergency badge
+                                if is_emergency:
+                                    st.error(f"🚨 **EMERGENCY** | Severity: **{severity}**")
+                                else:
+                                    st.info(f"📋 Routine | Severity: {severity}")
                                 
                                 col1, col2, col3, col4 = st.columns(4)
                                 col1.write(f"**Surgery:** {surgery.name}")
@@ -339,8 +367,7 @@ def main():
                                 theatre = surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A'
                                 col3.write(f"**Theatre:** {theatre}")
                                 
-                                patient = surgery_info['patient_name'] if surgery_info else 'N/A'
-                                col4.write(f"**Patient:** {patient}")
+                                col4.write(f"**Patient:** {patient_name}")
                                 
                                 st.markdown("---")
                         else:
@@ -533,23 +560,67 @@ def main():
         
         with col2:
             if st.button("🔍 Preview Conflicts"):
-                if selected_surgeon and selected_timeslot:
+                if selected_surgery_type and selected_surgeon and selected_theatre and selected_timeslot:
                     with st.spinner("Checking for potential conflicts..."):
-                        conflicts = conflict_detector.detect_all_conflicts()
+                        # Check prospective conflicts BEFORE adding
+                        prospective_conflicts = onto_mgr.check_prospective_conflicts(
+                            surgeon_name=selected_surgeon,
+                            theatre_name=selected_theatre,
+                            timeslot_name=selected_timeslot,
+                            is_emergency=is_emergency
+                        )
                         
-                        total_conflicts = sum(len(v) for v in conflicts.values())
-                        
-                        if total_conflicts == 0:
-                            st.success("✅ No conflicts detected with current schedules!")
+                        if not prospective_conflicts['has_conflicts']:
+                            st.success("✅ No conflicts detected! This timeslot is available.")
                         else:
-                            st.warning(f"⚠️ Found {total_conflicts} potential conflict(s)")
+                            st.error("⚠️ **CONFLICT DETECTED**")
                             
-                            if conflicts['surgeon_conflicts']:
-                                st.error(f"👨‍⚕️ Surgeon conflicts: {len(conflicts['surgeon_conflicts'])}")
-                            if conflicts['theatre_conflicts']:
-                                st.error(f"🏥 Theatre conflicts: {len(conflicts['theatre_conflicts'])}")
+                            # Show surgeon conflict
+                            if prospective_conflicts['surgeon_conflict']:
+                                conflict = prospective_conflicts['surgeon_conflict']
+                                st.warning(f"""
+                                **👨‍⚕️ Surgeon Conflict:**
+                                - Surgeon `{selected_surgeon}` is already performing **{conflict['conflicting_surgery']}**
+                                - Patient: **{conflict['patient']}** (Severity: **{conflict['severity']}**)
+                                - Emergency Status: {'🚨 **EMERGENCY**' if conflict['is_emergency'] else '📋 Routine'}
+                                """)
+                            
+                            # Show theatre conflict
+                            if prospective_conflicts['theatre_conflict']:
+                                conflict = prospective_conflicts['theatre_conflict']
+                                st.warning(f"""
+                                **🏥 Theatre Conflict:**
+                                - Theatre `{selected_theatre}` is occupied by **{conflict['conflicting_surgery']}**
+                                - Patient: **{conflict['patient']}** (Severity: **{conflict['severity']}**)
+                                - Surgeon: **{conflict['surgeon']}**
+                                """)
+                            
+                            # Show override options for emergencies
+                            if prospective_conflicts['can_override'] and is_emergency:
+                                st.info("🚨 **EMERGENCY OVERRIDE AVAILABLE**")
+                                for rec in prospective_conflicts['recommendations']:
+                                    st.warning(f"💡 {rec}")
+                            
+                            # Find alternative timeslots
+                            st.markdown("---")
+                            st.subheader("📅 Alternative Timeslots")
+                            alternatives = onto_mgr.find_alternative_timeslots(
+                                surgeon_name=selected_surgeon,
+                                theatre_name=selected_theatre,
+                                exclude_timeslot=selected_timeslot
+                            )
+                            
+                            if alternatives:
+                                available_slots = [a for a in alternatives if a['is_available']][:5]
+                                if available_slots:
+                                    st.success(f"Found {len(available_slots)} available alternative(s):")
+                                    for alt in available_slots:
+                                        st.write(f"✅ **{alt['timeslot']}** ({alt['start_time']} - {alt['end_time']})")
+                                else:
+                                    st.warning("No available alternatives found. Manual rescheduling required.")
                 else:
-                    st.warning("Fill in surgeon and timeslot first")
+                    st.warning("Please fill in all required fields first")
+
         
         with col3:
             if st.button("🔄 Reset Form"):
