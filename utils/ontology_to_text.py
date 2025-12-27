@@ -78,6 +78,13 @@ class OntologyToText:
         duration = _get_value(surgery.estimated_duration, 'N/A')
         emergency = _get_value(surgery.is_emergency, False)
         
+        # Find associated patient
+        patient_name = 'N/A'
+        for p in self.onto.Patient.instances():
+            if surgery in p.undergoes_surgery:
+                patient_name = p.name
+                break
+        
         timeslot = 'Not scheduled'
         date = 'N/A'
         if surgery.has_timeslot:
@@ -91,6 +98,7 @@ class OntologyToText:
         emergency_text = "This is an EMERGENCY surgery requiring immediate attention." if emergency else ""
         
         text = f"""Surgery: {surgery.name}
+        Patient: {patient_name}
         Surgeon: {surgeon}
         Theatre: {theatre}
         Scheduled Date: {date}

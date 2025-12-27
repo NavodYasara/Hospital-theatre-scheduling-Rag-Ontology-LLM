@@ -54,6 +54,13 @@ class OntologyManager:
     def get_all_timeslots(self) -> List:
         """Return all timeslot instances"""
         return list(self.onto.TimeSlot.instances())
+
+    def _get_patient_for_surgery(self, surgery) -> str:
+        """Helper to find the patient undergoing a specific surgery"""
+        for p in self.onto.Patient.instances():
+            if surgery in p.undergoes_surgery:
+                return p.name
+        return 'N/A'
     
     def get_surgeon_schedule(self, surgeon_name: str) -> List[Dict]:
         """Get all surgeries for a specific surgeon"""
@@ -67,6 +74,7 @@ class OntologyManager:
                 timeslot = surgery.has_timeslot[0]
                 schedule.append({
                     'surgery': surgery.name,
+                    'patient': self._get_patient_for_surgery(surgery),
                     'start_time': _get_value(timeslot.start_time, 'N/A'),
                     'end_time': _get_value(timeslot.end_time, 'N/A'),
                     'theatre': _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A'
@@ -86,6 +94,7 @@ class OntologyManager:
                     timeslot = surgery.has_timeslot[0]
                     schedule.append({
                         'surgery': surgery.name,
+                        'patient': self._get_patient_for_surgery(surgery),
                         'surgeon': _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A',
                         'start_time': _get_value(timeslot.start_time, 'N/A'),
                         'end_time': _get_value(timeslot.end_time, 'N/A')
@@ -180,6 +189,7 @@ class OntologyManager:
                     if surgery.has_timeslot and surgery.has_timeslot[0] == ts:
                         surgeries.append({
                             'surgery': surgery.name,
+                            'patient': self._get_patient_for_surgery(surgery),
                             'surgeon': _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A',
                             'theatre': _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A',
                             'start_time': _get_value(ts.start_time, 'N/A'),
