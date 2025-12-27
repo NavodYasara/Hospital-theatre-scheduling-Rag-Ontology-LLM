@@ -22,6 +22,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+def _get_value(prop, default=None):
+    """Safely get a property value, handling both list and scalar values."""
+    if prop is None:
+        return default
+    if isinstance(prop, list):
+        return prop[0] if prop else default
+    return prop
+
 # Initialize session state
 if 'initialized' not in st.session_state:
     st.session_state.initialized = False
@@ -118,7 +126,7 @@ def main():
         # Example queries
         with st.expander("💡 Example Questions"):
             st.markdown("""
-            - Is Dr. Smith available tomorrow at 9 AM?
+            - Is Dr. Smith available at 9 AM?
             - Which surgeons specialize in cardiology?
             - Show me all surgeries scheduled for today
             - Are there any conflicts in the current schedule?
@@ -312,20 +320,20 @@ def main():
             
             if timeslots:
                 for ts in timeslots:
-                    with st.expander(f"⏰ {ts.name} ({ts.start_time[0] if ts.start_time else 'N/A'} - {ts.end_time[0] if ts.end_time else 'N/A'})"):
+                    with st.expander(f"⏰ {ts.name} ({_get_value(ts.start_time, 'N/A')} - {_get_value(ts.end_time, 'N/A')})"):
                         # Find surgeries in this timeslot
                         surgeries = [s for s in onto_mgr.get_all_surgeries() 
-                                   if s.has_timeslot and s.has_timeslot[0] == ts]
+                                   if s.has_timeslot and _get_value(s.has_timeslot) == ts]
                         
                         if surgeries:
                             for surgery in surgeries:
                                 col1, col2, col3 = st.columns(3)
                                 col1.write(f"**Surgery:** {surgery.name}")
                                 
-                                surgeon = surgery.performs_operation[0].name if surgery.performs_operation else 'N/A'
+                                surgeon = _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A'
                                 col2.write(f"**Surgeon:** {surgeon}")
                                 
-                                theatre = surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A'
+                                theatre = _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A'
                                 col3.write(f"**Theatre:** {theatre}")
                                 
                                 st.markdown("---")
@@ -382,7 +390,7 @@ def main():
             
             # Get available timeslots
             timeslots = onto_mgr.get_all_timeslots()
-            timeslot_names = [f"{ts.name} ({ts.start_time[0] if ts.start_time else 'N/A'} - {ts.end_time[0] if ts.end_time else 'N/A'})" 
+            timeslot_names = [f"{ts.name} ({_get_value(ts.start_time, 'N/A')} - {_get_value(ts.end_time, 'N/A')})" 
                              for ts in timeslots]
             
             if timeslot_names:
@@ -646,7 +654,7 @@ def main():
             st.subheader("⏰ Delete All Surgeries in a Timeslot")
             
             timeslots = onto_mgr.get_all_timeslots()
-            timeslot_names = [f"{ts.name} ({ts.start_time[0] if ts.start_time else 'N/A'} - {ts.end_time[0] if ts.end_time else 'N/A'})" 
+            timeslot_names = [f"{ts.name} ({_get_value(ts.start_time, 'N/A')} - {_get_value(ts.end_time, 'N/A')})" 
                              for ts in timeslots]
             
             if timeslot_names:
@@ -657,16 +665,16 @@ def main():
                 if selected_timeslot:
                     st.markdown("### 📋 Surgeries in This Timeslot")
                     surgeries_in_slot = [s for s in onto_mgr.get_all_surgeries() 
-                                        if s.has_timeslot and s.has_timeslot[0].name == selected_timeslot]
+                                        if s.has_timeslot and _get_value(s.has_timeslot).name == selected_timeslot]
                     
                     if surgeries_in_slot:
                         for surgery in surgeries_in_slot:
                             with st.container():
                                 col1, col2, col3 = st.columns(3)
                                 col1.write(f"**{surgery.name}**")
-                                surgeon = surgery.performs_operation[0].name if surgery.performs_operation else 'N/A'
+                                surgeon = _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A'
                                 col2.write(f"👨‍⚕️ {surgeon}")
-                                theatre = surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A'
+                                theatre = _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A'
                                 col3.write(f"🏥 {theatre}")
                                 st.markdown("---")
                         

@@ -1,6 +1,14 @@
-from typing import Dict, List
+from typing import Dict, List, Any
 from .vector_store import VectorStore
 from utils.ontology_to_text import OntologyToText
+
+def _get_value(prop, default=None) -> Any:
+    """Safely get a property value, handling both list and scalar values."""
+    if prop is None:
+        return default
+    if isinstance(prop, list):
+        return prop[0] if prop else default
+    return prop
 
 class RAGRetriever:
     """
@@ -251,8 +259,8 @@ class RAGRetriever:
                 if all_surgeons:
                     surgeon_info = []
                     for s in all_surgeons:
-                        license = s.has_license_number[0] if s.has_license_number else 'N/A'
-                        theatre = s.works_in_theatre[0].name if s.works_in_theatre else 'N/A'
+                        license = _get_value(s.has_license_number, 'N/A')
+                        theatre = _get_value(s.works_in_theatre).name if s.works_in_theatre else 'N/A'
                         surgeon_info.append(f"{s.name} (License: {license}, Theatre: {theatre})")
                     facts['All Surgeons'] = {
                         'type': 'surgeon_list',
@@ -301,8 +309,8 @@ class RAGRetriever:
                     if all_surgeries:
                         surgery_info = []
                         for s in all_surgeries:
-                            surgeon = s.performs_operation[0].name if s.performs_operation else 'N/A'
-                            theatre = s.requires_theatre_type[0].name if s.requires_theatre_type else 'N/A'
+                            surgeon = _get_value(s.performs_operation).name if s.performs_operation else 'N/A'
+                            theatre = _get_value(s.requires_theatre_type).name if s.requires_theatre_type else 'N/A'
                             surgery_info.append(f"{s.name} (Surgeon: {surgeon}, Theatre: {theatre})")
                         facts['All Surgeries'] = {
                             'type': 'surgery_list',
@@ -360,7 +368,10 @@ class RAGRetriever:
                     if data['count'] > 0:
                         formatted.append(f"  Details:")
                         for surgery in data['details']:
-                            formatted.append(f"    • {surgery['surgery']}: Surgeon={surgery['surgeon']}, Theatre={surgery['theatre']}, Time={surgery['start_time']}-{surgery['end_time']}, Emergency={'Yes' if surgery.get('is_emergency') else 'No'}")
+                            is_emergency = surgery.get('is_emergency')
+                            if isinstance(is_emergency, list):
+                                is_emergency = is_emergency[0] if is_emergency else False
+                            formatted.append(f"    • {surgery['surgery']}: Surgeon={surgery['surgeon']}, Theatre={surgery['theatre']}, Time={surgery['start_time']}-{surgery['end_time']}, Emergency={'Yes' if is_emergency else 'No'}")
                     else:
                         formatted.append(f"  No surgeries scheduled")
                 

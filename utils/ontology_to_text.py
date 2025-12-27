@@ -1,4 +1,12 @@
-from typing import List, Dict
+from typing import List, Dict, Any
+
+def _get_value(prop, default=None) -> Any:
+    """Safely get a property value, handling both list and scalar values."""
+    if prop is None:
+        return default
+    if isinstance(prop, list):
+        return prop[0] if prop else default
+    return prop
 
 class OntologyToText:
     """
@@ -12,21 +20,21 @@ class OntologyToText:
     
     def surgeon_to_text(self, surgeon) -> str:
         """Convert surgeon entity to natural language"""
-        license = surgeon.has_license_number[0] if surgeon.has_license_number else 'N/A'
+        license = _get_value(surgeon.has_license_number, 'N/A')
         
         # Get specialization
         specialization = 'N/A'
         if surgeon.works_in_theatre:
-            theatre = surgeon.works_in_theatre[0]
+            theatre = _get_value(surgeon.works_in_theatre)
             specialization = theatre.name.replace('_Theatre', '').replace('_', ' ')
         
         # Get current surgeries
         surgeries = []
         for surgery in surgeon.performs_operation:
             if surgery.has_timeslot:
-                ts = surgery.has_timeslot[0]
-                start = ts.start_time[0] if ts.start_time else 'N/A'
-                end = ts.end_time[0] if ts.end_time else 'N/A'
+                ts = _get_value(surgery.has_timeslot)
+                start = _get_value(ts.start_time, 'N/A') if ts else 'N/A'
+                end = _get_value(ts.end_time, 'N/A') if ts else 'N/A'
                 surgeries.append(f"{surgery.name} ({start} - {end})")
         
         surgeries_text = ", ".join(surgeries) if surgeries else "No surgeries scheduled"
@@ -34,7 +42,7 @@ class OntologyToText:
         text = f"""Surgeon: {surgeon.name}
         License Number: {license}
         Specialization: {specialization}
-        Works In: {surgeon.works_in_theatre[0].name if surgeon.works_in_theatre else 'N/A'}
+        Works In: {_get_value(surgeon.works_in_theatre).name if surgeon.works_in_theatre else 'N/A'}
         Current Surgeries: {surgeries_text}
         This surgeon is qualified to perform surgeries requiring {specialization} expertise."""
         
@@ -45,11 +53,11 @@ class OntologyToText:
         # Get surgeries scheduled in this theatre
         surgeries = []
         for surgery in self.onto.Surgery.instances():
-            if surgery.requires_theatre_type and surgery.requires_theatre_type[0] == theatre:
+            if surgery.requires_theatre_type and _get_value(surgery.requires_theatre_type) == theatre:
                 if surgery.has_timeslot:
-                    ts = surgery.has_timeslot[0]
-                    start = ts.start_time[0] if ts.start_time else 'N/A'
-                    surgeon = surgery.performs_operation[0].name if surgery.performs_operation else 'N/A'
+                    ts = _get_value(surgery.has_timeslot)
+                    start = _get_value(ts.start_time, 'N/A') if ts else 'N/A'
+                    surgeon = _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A'
                     surgeries.append(f"{surgery.name} at {start} with {surgeon}")
         
         surgeries_text = ", ".join(surgeries) if surgeries else "No surgeries scheduled"
@@ -65,18 +73,18 @@ class OntologyToText:
     
     def surgery_to_text(self, surgery) -> str:
         """Convert surgery entity to natural language"""
-        surgeon = surgery.performs_operation[0].name if surgery.performs_operation else 'N/A'
-        theatre = surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A'
-        duration = surgery.estimated_duration[0] if surgery.estimated_duration else 'N/A'
-        emergency = surgery.is_emergency[0] if surgery.is_emergency else False
+        surgeon = _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A'
+        theatre = _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A'
+        duration = _get_value(surgery.estimated_duration, 'N/A')
+        emergency = _get_value(surgery.is_emergency, False)
         
         timeslot = 'Not scheduled'
         date = 'N/A'
         if surgery.has_timeslot:
-            ts = surgery.has_timeslot[0]
-            start = ts.start_time[0] if ts.start_time else 'N/A'
-            end = ts.end_time[0] if ts.end_time else 'N/A'
-            date = ts.date[0] if ts.date else 'N/A'
+            ts = _get_value(surgery.has_timeslot)
+            start = _get_value(ts.start_time, 'N/A') if ts else 'N/A'
+            end = _get_value(ts.end_time, 'N/A') if ts else 'N/A'
+            date = _get_value(ts.date, 'N/A') if ts else 'N/A'
             timeslot = f"{start} to {end} on {date}"
         
         
@@ -98,23 +106,24 @@ class OntologyToText:
         # Get surgery information
         surgery_info = 'No surgery scheduled'
         if patient.undergoes_surgery:
-            surgery = patient.undergoes_surgery[0]
-            if surgery.has_timeslot:
-                ts = surgery.has_timeslot[0]
-                start = ts.start_time[0] if ts.start_time else 'N/A'
-                end = ts.end_time[0] if ts.end_time else 'N/A'
+            surgery = _get_value(patient.undergoes_surgery)
+            if surgery and surgery.has_timeslot:
+                ts = _get_value(surgery.has_timeslot)
+                start = _get_value(ts.start_time, 'N/A') if ts else 'N/A'
+                end = _get_value(ts.end_time, 'N/A') if ts else 'N/A'
                 surgery_info = f"{surgery.name} scheduled from {start} to {end}"
         
         # Get admission time
         admission_time = 'Not assigned'
         if patient.admitted_at_time:
-            ts = patient.admitted_at_time[0]
-            start = ts.start_time[0] if ts.start_time else 'N/A'
+            ts = _get_value(patient.admitted_at_time)
+            start = _get_value(ts.start_time, 'N/A') if ts else 'N/A'
             admission_time = f"{start}"
         
-        ward = patient.admitted_to[0].name if patient.admitted_to else 'N/A'
-        recovery = patient.assigned_to_recovery[0].name if patient.assigned_to_recovery else 'N/A'
-        severity = patient.has_severity[0].severity_level[0] if patient.has_severity and patient.has_severity[0].severity_level else 'N/A'
+        ward = _get_value(patient.admitted_to).name if patient.admitted_to else 'N/A'
+        recovery = _get_value(patient.assigned_to_recovery).name if patient.assigned_to_recovery else 'N/A'
+        severity_obj = _get_value(patient.has_severity)
+        severity = _get_value(severity_obj.severity_level, 'N/A') if severity_obj and hasattr(severity_obj, 'severity_level') else 'N/A'
         
         text = f"""Patient: {patient.name}
         Surgery: {surgery_info}
@@ -128,16 +137,16 @@ class OntologyToText:
     
     def timeslot_to_text(self, timeslot) -> str:
         """Convert timeslot to natural language"""
-        start = timeslot.start_time[0] if timeslot.start_time else 'N/A'
-        end = timeslot.end_time[0] if timeslot.end_time else 'N/A'
-        duration = timeslot.duration[0] if timeslot.duration else 'N/A'
-        date = timeslot.date[0] if timeslot.date else 'N/A'
+        start = _get_value(timeslot.start_time, 'N/A')
+        end = _get_value(timeslot.end_time, 'N/A')
+        duration = _get_value(timeslot.duration, 'N/A')
+        date = _get_value(timeslot.date, 'N/A')
         
         # Find surgeries in this timeslot
         surgeries = []
         for surgery in self.onto.Surgery.instances():
-            if surgery.has_timeslot and surgery.has_timeslot[0] == timeslot:
-                surgeon = surgery.performs_operation[0].name if surgery.performs_operation else 'Unknown'
+            if surgery.has_timeslot and _get_value(surgery.has_timeslot) == timeslot:
+                surgeon = _get_value(surgery.performs_operation).name if surgery.performs_operation else 'Unknown'
                 surgeries.append(f"{surgery.name} (Surgeon: {surgeon})")
         
         surgeries_text = ", ".join(surgeries) if surgeries else "Available - no surgeries scheduled"
