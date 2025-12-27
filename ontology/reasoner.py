@@ -1,6 +1,14 @@
 from owlready2 import sync_reasoner_pellet, Imp
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 from datetime import datetime
+
+def _get_value(prop, default=None) -> Any:
+    """Safely get a property value, handling both list and scalar values."""
+    if prop is None:
+        return default
+    if isinstance(prop, list):
+        return prop[0] if prop else default
+    return prop
 
 class ConflictDetector:
     """
@@ -101,7 +109,7 @@ class ConflictDetector:
             
             # Get all surgeries in this theatre
             surgeries = [s for s in self.onto.Surgery.instances() 
-                        if s.requires_theatre_type and s.requires_theatre_type[0] == theatre]
+                        if s.requires_theatre_type and _get_value(s.requires_theatre_type) == theatre]
             
             # Compare all pairs
             for i in range(len(surgeries)):
@@ -128,8 +136,8 @@ class ConflictDetector:
             if not surgery.performs_operation or not surgery.requires_theatre_type:
                 continue
             
-            surgeon = surgery.performs_operation[0]
-            required_theatre = surgery.requires_theatre_type[0]
+            surgeon = _get_value(surgery.performs_operation)
+            required_theatre = _get_value(surgery.requires_theatre_type)
             
             if surgeon.works_in_theatre:
                 surgeon_theatres = surgeon.works_in_theatre
@@ -192,19 +200,24 @@ class ConflictDetector:
         if not surgery1.has_timeslot or not surgery2.has_timeslot:
             return False
         
-        ts1 = surgery1.has_timeslot[0]
-        ts2 = surgery2.has_timeslot[0]
+        ts1 = _get_value(surgery1.has_timeslot)
+        ts2 = _get_value(surgery2.has_timeslot)
+        
+        if not ts1 or not ts2:
+            return False
         
         # Check if timeslots have temporal overlap property
         if hasattr(ts1, 'has_temporal_overlap') and ts2 in ts1.has_temporal_overlap:
             return True
         
         # Check time strings using robust parsing
-        if ts1.start_time and ts1.end_time and ts2.start_time and ts2.end_time:
-            return self._times_overlap(
-                ts1.start_time[0], ts1.end_time[0],
-                ts2.start_time[0], ts2.end_time[0]
-            )
+        start1 = _get_value(ts1.start_time) if ts1.start_time else None
+        end1 = _get_value(ts1.end_time) if ts1.end_time else None
+        start2 = _get_value(ts2.start_time) if ts2.start_time else None
+        end2 = _get_value(ts2.end_time) if ts2.end_time else None
+        
+        if start1 and end1 and start2 and end2:
+            return self._times_overlap(start1, end1, start2, end2)
         
         return False
     

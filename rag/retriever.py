@@ -1,6 +1,15 @@
-from typing import Dict, List
+from typing import Dict, List, Any
 from .vector_store import VectorStore
 from utils.ontology_to_text import OntologyToText
+from ontology.reasoner import ConflictDetector
+
+def _get_value(prop, default=None) -> Any:
+    """Safely get a property value, handling both list and scalar values."""
+    if prop is None:
+        return default
+    if isinstance(prop, list):
+        return prop[0] if prop else default
+    return prop
 
 class RAGRetriever:
     """
@@ -11,6 +20,7 @@ class RAGRetriever:
         self.onto_mgr = ontology_manager
         self.vector_store = VectorStore()
         self.onto_to_text = OntologyToText(ontology_manager)
+        self.conflict_detector = ConflictDetector(ontology_manager)
         self.is_initialized = False
     
     def initialize(self):
@@ -86,9 +96,15 @@ class RAGRetriever:
             'list_surgeries': False,
             'list_theatres': False,
             'list_timeslots': False,
+            'detect_conflicts': False,
             'query_date': None,
             'query_theatre': None
         }
+        
+        # Detect conflict queries
+        conflict_keywords = ['conflict', 'overlap', 'double book', 'issue', 'problem', 'error', 'violation', 'clash']
+        if any(kw in query_lower for kw in conflict_keywords):
+            intent['detect_conflicts'] = True
         
         # Detect list/show/get all queries
         list_keywords = ['list', 'show', 'give', 'names', 'all', 'what', 'which', 'who', 'any']
@@ -231,6 +247,15 @@ class RAGRetriever:
         """Query ontology for factual information about extracted entities or all entities based on intent"""
         facts = {}
         
+        # Handle conflict detection intent
+        if intent and intent.get('detect_conflicts'):
+            print("Running full conflict scan for user query...")
+            conflicts = self.conflict_detector.detect_all_conflicts()
+            facts['Conflict Report'] = {
+                'type': 'conflict_report',
+                'data': conflicts
+            }
+        
         # Handle list-all intents
         if intent:
             # List all patients
@@ -251,8 +276,8 @@ class RAGRetriever:
                 if all_surgeons:
                     surgeon_info = []
                     for s in all_surgeons:
-                        license = s.has_license_number[0] if s.has_license_number else 'N/A'
-                        theatre = s.works_in_theatre[0].name if s.works_in_theatre else 'N/A'
+                        license = _get_value(s.has_license_number, 'N/A')
+                        theatre = _get_value(s.works_in_theatre).name if s.works_in_theatre else 'N/A'
                         surgeon_info.append(f"{s.name} (License: {license}, Theatre: {theatre})")
                     facts['All Surgeons'] = {
                         'type': 'surgeon_list',
@@ -301,8 +326,8 @@ class RAGRetriever:
                     if all_surgeries:
                         surgery_info = []
                         for s in all_surgeries:
-                            surgeon = s.performs_operation[0].name if s.performs_operation else 'N/A'
-                            theatre = s.requires_theatre_type[0].name if s.requires_theatre_type else 'N/A'
+                            surgeon = _get_value(s.performs_operation).name if s.performs_operation else 'N/A'
+                            theatre = _get_value(s.requires_theatre_type).name if s.requires_theatre_type else 'N/A'
                             surgery_info.append(f"{s.name} (Surgeon: {surgeon}, Theatre: {theatre})")
                         facts['All Surgeries'] = {
                             'type': 'surgery_list',
@@ -352,54 +377,93 @@ class RAGRetriever:
         if context['ontology_facts']:
             formatted.append("\n=== Ontology Facts ===")
             for entity, data in context['ontology_facts'].items():
-                formatted.append(f"\n{entity}:")
                 
-                # Handle date-filtered surgery lists
-                if data.get('type') == 'surgery_list_filtered':
-                    formatted.append(f"  Total Count: {data['count']}")
-                    if data['count'] > 0:
-                        formatted.append(f"  Details:")
-                        for surgery in data['details']:
-                            formatted.append(f"    • {surgery['surgery']}: Surgeon={surgery['surgeon']}, Theatre={surgery['theatre']}, Time={surgery['start_time']}-{surgery['end_time']}, Emergency={'Yes' if surgery.get('is_emergency') else 'No'}")
+                # Handle formatted Conflict Report
+                if data.get('type') == 'conflict_report':
+                    conflicts = data['data']
+                    total = sum(len(v) for v in conflicts.values())
+                    formatted.append(f"\n📢 CONFLICT SCAN REPORT")
+                    if total == 0:
+                        formatted.append("Result: ✅ No scheduling conflicts detected in the system.")
                     else:
-                        formatted.append(f"  No surgeries scheduled")
-                
-                # Handle theatre schedules
-                elif data.get('type') == 'theatre_schedule':
-                    formatted.append(f"  Total Count: {data['count']}")
-                    if data['count'] > 0:
-                        formatted.append(f"  Details:")
-                        for item in data['details']:
-                            formatted.append(f"    • {item['surgery']}: Surgeon={item['surgeon']}, Time={item['start_time']}-{item['end_time']}")
-                
-                # Handle list data (patient_list, surgeon_list, surgery_list)
-                elif data.get('type') in ['patient_list', 'surgeon_list', 'surgery_list']:
-                    formatted.append(f"  Total Count: {data['count']}")
-                    formatted.append(f"  Names: {', '.join(data['names'])}")
-                    if 'details' in data:
-                        formatted.append(f"  Details:")
-                        if data['type'] == 'patient_list':
-                            for patient_detail in data['details']:
-                                if patient_detail:
-                                    formatted.append(f"    • {patient_detail['patient_name']}: Surgery={patient_detail.get('surgery', 'N/A')}, Ward={patient_detail.get('ward', 'N/A')}, Severity={patient_detail.get('severity', 'N/A')}")
+                        formatted.append(f"Result: ⚠️ Found {total} conflict(s).")
+                        
+                        if conflicts.get('patient_conflicts'):
+                            formatted.append("\n  🔴 Patient Double-Bookings (CRITICAL):")
+                            for c in conflicts['patient_conflicts']:
+                                formatted.append(f"    - {c['description']} ({c['surgery1']} vs {c['surgery2']})")
+                        
+                        if conflicts.get('surgeon_conflicts'):
+                            formatted.append("\n  🟠 Surgeon Double-Bookings:")
+                            for c in conflicts['surgeon_conflicts']:
+                                formatted.append(f"    - {c['description']} ({c['surgery1']} vs {c['surgery2']})")
+                        
+                        if conflicts.get('theatre_conflicts'):
+                            formatted.append("\n  🟡 Theatre Double-Bookings:")
+                            for c in conflicts['theatre_conflicts']:
+                                formatted.append(f"    - {c['description']} ({c['surgery1']} vs {c['surgery2']})")
+
+                        if conflicts.get('specialization_mismatches'):
+                            formatted.append("\n  🔵 Specialization Mismatches:")
+                            for c in conflicts['specialization_mismatches']:
+                                formatted.append(f"    - {c['description']}")
+
+                # Standard entities
+                else:
+                    formatted.append(f"\n{entity}:")
+                    
+                    # Handle date-filtered surgery lists
+                    if data.get('type') == 'surgery_list_filtered':
+                        formatted.append(f"  Total Count: {data['count']}")
+                        if data['count'] > 0:
+                            formatted.append(f"  Details:")
+                            for surgery in data['details']:
+                                is_emergency = surgery.get('is_emergency')
+                                if isinstance(is_emergency, list):
+                                    is_emergency = is_emergency[0] if is_emergency else False
+                                # Added Patient Name to display
+                                formatted.append(f"    • {surgery['surgery']}: Patient={surgery.get('patient', 'N/A')}, Surgeon={surgery['surgeon']}, Theatre={surgery['theatre']}, Time={surgery['start_time']}-{surgery['end_time']}, Emergency={'Yes' if is_emergency else 'No'}")
                         else:
-                            for detail in data['details']:
-                                formatted.append(f"    • {detail}")
-                
-                # Handle schedule data
-                elif 'schedule' in data:
-                    for item in data['schedule']:
-                        formatted.append(f"  - {item}")
-                
-                # Handle patient info data
-                elif 'info' in data:
-                    info = data['info']
-                    formatted.append(f"  - Patient Name: {info.get('patient_name', 'N/A')}")
-                    formatted.append(f"  - Surgery: {info.get('surgery_details', 'N/A')}")
-                    formatted.append(f"  - Surgeon: {info.get('surgeon', 'N/A')}")
-                    formatted.append(f"  - Ward: {info.get('ward', 'N/A')}")
-                    formatted.append(f"  - Recovery Room: {info.get('recovery_room', 'N/A')}")
-                    formatted.append(f"  - Severity: {info.get('severity', 'N/A')}")
-                    formatted.append(f"  - Admission Time: {info.get('admission_time', 'N/A')}")
+                            formatted.append(f"  No surgeries scheduled")
+                    
+                    # Handle theatre schedules
+                    elif data.get('type') == 'theatre_schedule':
+                        formatted.append(f"  Total Count: {data['count']}")
+                        if data['count'] > 0:
+                            formatted.append(f"  Details:")
+                            for item in data['details']:
+                                # Added Patient Name to display
+                                formatted.append(f"    • {item['surgery']}: Patient={item.get('patient', 'N/A')}, Surgeon={item['surgeon']}, Time={item['start_time']}-{item['end_time']}")
+                    
+                    # Handle list data (patient_list, surgeon_list, surgery_list)
+                    elif data.get('type') in ['patient_list', 'surgeon_list', 'surgery_list']:
+                        formatted.append(f"  Total Count: {data['count']}")
+                        formatted.append(f"  Names: {', '.join(data['names'])}")
+                        if 'details' in data:
+                            formatted.append(f"  Details:")
+                            if data['type'] == 'patient_list':
+                                for patient_detail in data['details']:
+                                    if patient_detail:
+                                        formatted.append(f"    • {patient_detail['patient_name']}: Surgery={patient_detail.get('surgery', 'N/A')}, Ward={patient_detail.get('ward', 'N/A')}, Severity={patient_detail.get('severity', 'N/A')}")
+                            else:
+                                for detail in data['details']:
+                                    formatted.append(f"    • {detail}")
+                    
+                    # Handle schedule data
+                    elif 'schedule' in data:
+                        for item in data['schedule']:
+                            # Added Patient Name to display
+                            formatted.append(f"  - {item['surgery']}: Patient={item.get('patient', 'N/A')}, Time={item['start_time']}-{item['end_time']}, Theatre={item.get('theatre', 'N/A')}")
+                    
+                    # Handle patient info data
+                    elif 'info' in data:
+                        info = data['info']
+                        formatted.append(f"  - Patient Name: {info.get('patient_name', 'N/A')}")
+                        formatted.append(f"  - Surgery: {info.get('surgery_details', 'N/A')}")
+                        formatted.append(f"  - Surgeon: {info.get('surgeon', 'N/A')}")
+                        formatted.append(f"  - Ward: {info.get('ward', 'N/A')}")
+                        formatted.append(f"  - Recovery Room: {info.get('recovery_room', 'N/A')}")
+                        formatted.append(f"  - Severity: {info.get('severity', 'N/A')}")
+                        formatted.append(f"  - Admission Time: {info.get('admission_time', 'N/A')}")
         
         return "\n".join(formatted)

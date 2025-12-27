@@ -1,7 +1,15 @@
 from owlready2 import *
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from datetime import time as Time
 import os
+
+def _get_value(prop, default=None) -> Any:
+    """Safely get a property value, handling both list and scalar values."""
+    if prop is None:
+        return default
+    if isinstance(prop, list):
+        return prop[0] if prop else default
+    return prop
 
 class OntologyManager:
     """
@@ -46,6 +54,13 @@ class OntologyManager:
     def get_all_timeslots(self) -> List:
         """Return all timeslot instances"""
         return list(self.onto.TimeSlot.instances())
+
+    def _get_patient_for_surgery(self, surgery) -> str:
+        """Helper to find the patient undergoing a specific surgery"""
+        for p in self.onto.Patient.instances():
+            if surgery in p.undergoes_surgery:
+                return p.name
+        return 'N/A'
     
     def get_surgeon_schedule(self, surgeon_name: str) -> List[Dict]:
         """Get all surgeries for a specific surgeon"""
@@ -59,9 +74,10 @@ class OntologyManager:
                 timeslot = surgery.has_timeslot[0]
                 schedule.append({
                     'surgery': surgery.name,
-                    'start_time': timeslot.start_time[0] if timeslot.start_time else 'N/A',
-                    'end_time': timeslot.end_time[0] if timeslot.end_time else 'N/A',
-                    'theatre': surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A'
+                    'patient': self._get_patient_for_surgery(surgery),
+                    'start_time': _get_value(timeslot.start_time, 'N/A'),
+                    'end_time': _get_value(timeslot.end_time, 'N/A'),
+                    'theatre': _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A'
                 })
         return schedule
     
@@ -78,9 +94,10 @@ class OntologyManager:
                     timeslot = surgery.has_timeslot[0]
                     schedule.append({
                         'surgery': surgery.name,
-                        'surgeon': surgery.performs_operation[0].name if surgery.performs_operation else 'N/A',
-                        'start_time': timeslot.start_time[0] if timeslot.start_time else 'N/A',
-                        'end_time': timeslot.end_time[0] if timeslot.end_time else 'N/A'
+                        'patient': self._get_patient_for_surgery(surgery),
+                        'surgeon': _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A',
+                        'start_time': _get_value(timeslot.start_time, 'N/A'),
+                        'end_time': _get_value(timeslot.end_time, 'N/A')
                     })
         return schedule
     
@@ -172,12 +189,13 @@ class OntologyManager:
                     if surgery.has_timeslot and surgery.has_timeslot[0] == ts:
                         surgeries.append({
                             'surgery': surgery.name,
-                            'surgeon': surgery.performs_operation[0].name if surgery.performs_operation else 'N/A',
-                            'theatre': surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A',
-                            'start_time': ts.start_time[0] if ts.start_time else 'N/A',
-                            'end_time': ts.end_time[0] if ts.end_time else 'N/A',
+                            'patient': self._get_patient_for_surgery(surgery),
+                            'surgeon': _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A',
+                            'theatre': _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A',
+                            'start_time': _get_value(ts.start_time, 'N/A'),
+                            'end_time': _get_value(ts.end_time, 'N/A'),
                             'date': date,
-                            'is_emergency': surgery.is_emergency[0] if surgery.is_emergency else False
+                            'is_emergency': _get_value(surgery.is_emergency, False)
                         })
             
             return surgeries
@@ -360,18 +378,19 @@ class OntologyManager:
                     patient = p
                     break
             
+            timeslot = _get_value(surgery.has_timeslot)
             info = {
                 'surgery_name': surgery.name,
-                'surgeon': surgery.performs_operation[0].name if surgery.performs_operation else 'N/A',
-                'theatre': surgery.requires_theatre_type[0].name if surgery.requires_theatre_type else 'N/A',
-                'timeslot': surgery.has_timeslot[0].name if surgery.has_timeslot else 'N/A',
-                'start_time': surgery.has_timeslot[0].start_time[0] if surgery.has_timeslot and surgery.has_timeslot[0].start_time else 'N/A',
-                'end_time': surgery.has_timeslot[0].end_time[0] if surgery.has_timeslot and surgery.has_timeslot[0].end_time else 'N/A',
-                'duration': surgery.estimated_duration[0] if surgery.estimated_duration else 'N/A',
-                'is_emergency': surgery.is_emergency[0] if surgery.is_emergency else False,
+                'surgeon': _get_value(surgery.performs_operation).name if surgery.performs_operation else 'N/A',
+                'theatre': _get_value(surgery.requires_theatre_type).name if surgery.requires_theatre_type else 'N/A',
+                'timeslot': timeslot.name if timeslot else 'N/A',
+                'start_time': _get_value(timeslot.start_time, 'N/A') if timeslot else 'N/A',
+                'end_time': _get_value(timeslot.end_time, 'N/A') if timeslot else 'N/A',
+                'duration': _get_value(surgery.estimated_duration, 'N/A'),
+                'is_emergency': _get_value(surgery.is_emergency, False),
                 'patient_name': patient.name if patient else 'N/A',
-                'patient_ward': patient.admitted_to[0].name if patient and patient.admitted_to else 'N/A',
-                'recovery_room': patient.assigned_to_recovery[0].name if patient and patient.assigned_to_recovery else 'N/A'
+                'patient_ward': _get_value(patient.admitted_to).name if patient and patient.admitted_to else 'N/A',
+                'recovery_room': _get_value(patient.assigned_to_recovery).name if patient and patient.assigned_to_recovery else 'N/A'
             }
             
             return info
@@ -401,11 +420,14 @@ class OntologyManager:
                     surgeon_name = surgery.performs_operation[0].name
                 
                 if surgery.has_timeslot:
-                    ts = surgery.has_timeslot[0]
-                    start = ts.start_time[0] if ts.start_time else 'N/A'
-                    end = ts.end_time[0] if ts.end_time else 'N/A'
+                    ts = _get_value(surgery.has_timeslot)
+                    start = _get_value(ts.start_time, 'N/A') if ts else 'N/A'
+                    end = _get_value(ts.end_time, 'N/A') if ts else 'N/A'
                     timeslot_info = f"{start} to {end}"
                     surgery_info = f"{surgery_name} scheduled from {start} to {end}"
+            
+            severity_obj = _get_value(patient.has_severity)
+            admission_ts = _get_value(patient.admitted_at_time)
             
             info = {
                 'patient_name': patient.name,
@@ -413,10 +435,10 @@ class OntologyManager:
                 'surgery_details': surgery_info,
                 'surgeon': surgeon_name,
                 'timeslot': timeslot_info,
-                'ward': patient.admitted_to[0].name if patient.admitted_to else 'N/A',
-                'recovery_room': patient.assigned_to_recovery[0].name if patient.assigned_to_recovery else 'N/A',
-                'severity': patient.has_severity[0].severity_level[0] if patient.has_severity and patient.has_severity[0].severity_level else 'N/A',
-                'admission_time': patient.admitted_at_time[0].start_time[0] if patient.admitted_at_time and patient.admitted_at_time[0].start_time else 'N/A'
+                'ward': _get_value(patient.admitted_to).name if patient.admitted_to else 'N/A',
+                'recovery_room': _get_value(patient.assigned_to_recovery).name if patient.assigned_to_recovery else 'N/A',
+                'severity': _get_value(severity_obj.severity_level, 'N/A') if severity_obj and hasattr(severity_obj, 'severity_level') else 'N/A',
+                'admission_time': _get_value(admission_ts.start_time, 'N/A') if admission_ts and hasattr(admission_ts, 'start_time') else 'N/A'
             }
             
             return info
